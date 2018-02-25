@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+import "Solidity.proto";
+
+message TaskList {
+    message Task {
+        string explanation = 1;
+        uint64 due_date = 2;
+        message Progress {
+            string name = 1;
+        }
+        repeated Progress progresses = 3;
+    }
+    message UrgentTask {
+        string explanation = 1;        
+        uint32 priority = 2;
+    }
+    .solidity.address id = 1;
+    repeated Task tasks = 2;
+    repeated UrgentTask urgents = 3;
+}
+
+
+message Rewards {
+    repeated .solidity.uint256 id = 1;
+    fixed64 f1 = 2;
+    fixed32 f2 = 3;
+    repeated sfixed64 f3 = 4;
+    sfixed32 f4 = 5;
+}

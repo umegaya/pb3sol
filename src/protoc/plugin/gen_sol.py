@@ -132,15 +132,33 @@ def gen_codec(msg, main_codecs, delegate_codecs, parent_struct_name = None):
     for nested in msg.nested_type:
         gen_codec(nested, main_codecs, delegate_codecs, util.add_prefix(parent_struct_name, msg.name))
 
+
+
 SOLIDITY_NATIVE_TYPEDEFS = "Solidity.proto"
-def generate_code(request, response):
-    generated = 0
-    params = util.parse_urllike_parameter(request.parameter)
-    runtime_file_name = "runtime.sol"
+RUNTIME_FILE_NAME = "runtime.sol"
+GEN_RUNTIME = False
+def apply_options(params_string):
+    pp.pprint("params:{}".format(params_string))
+    params = util.parse_urllike_parameter(params_string)
+    pp.pprint(params)
     if "gen_runtime" in params:
+        pp.pprint("find gen_runtime")
+        global GEN_RUNTIME
+        GEN_RUNTIME = True
         name = params["gen_runtime"]
         if name.endswith(".sol"):
-            runtime_file_name = name
+            global RUNTIME_FILE_NAME
+            RUNTIME_FILE_NAME = name
+    if "pb_libname" in params:
+        pp.pprint("find pb_libname")
+        util.change_pb_libname(params["pb_libname"])
+
+
+def generate_code(request, response):
+    generated = 0
+
+    apply_options(request.parameter)
+    pp.pprint('settings:{}, {}'.format(RUNTIME_FILE_NAME, GEN_RUNTIME))
     
     for proto_file in request.proto_file:
         # skip native solidity type definition
@@ -152,11 +170,11 @@ def generate_code(request, response):
         # generate sol library
         # prologue
         output.append('pragma solidity ^{0};'.format(util.SOLIDITY_VERSION))
-        output.append('import "./{0}";'.format(runtime_file_name))
+        output.append('import "./{0}";'.format(RUNTIME_FILE_NAME))
         for dep in proto_file.dependency:
             if SOLIDITY_NATIVE_TYPEDEFS in dep:
                 continue
-            output.append('import "./{0}";'.format(dep.replace('proto', 'pb.sol')))
+            output.append('import "./{0}";'.format(dep.replace('.proto', '_pb.sol')))
         output.append('library {0} {{'.format(util.PB_LIB_NAME))
 
         # generate per message codes
@@ -176,21 +194,21 @@ def generate_code(request, response):
             # Fill response
             basepath = os.path.basename(proto_file.name)
             f = response.file.add()
-            f.name = basepath.replace('.proto', '.pb.sol')
+            f.name = basepath.replace('.proto', '_pb.sol')
             f.content = '\n'.join(output)
             # increase generated file count
             generated = generated + 1
 
-    if generated > 0 and ("gen_runtime" in params):
+    if generated > 0 and GEN_RUNTIME:
         try:
             with open('/protoc/plugin/runtime/runtime.sol', 'r') as runtime:
                 rf = response.file.add()
-                rf.name = runtime_file_name
+                rf.name = RUNTIME_FILE_NAME
                 rf.content = runtime.read()
-        except e:
+        except Exception as e:
             sys.stderr.write(
                 "required to generate solidity runtime at {} but cannot open runtime with error {}\n".format(
-                    params["gen_runtime"], e
+                    RUNTIME_FILE_NAME, e
                 )
             )
 
@@ -202,7 +220,7 @@ if __name__ == '__main__':
     request = plugin.CodeGeneratorRequest()
     request.ParseFromString(data)
 
-    pp.pprint(request)
+    #pp.pprint(request)
 
     # Create response
     response = plugin.CodeGeneratorResponse()

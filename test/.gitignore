@@ -1,2 +1,4 @@
-contracts/libs/*.sol
-build/*
+proto/TaskList2.proto
+build
+contracts/libs/pb/*.sol
+TaskList_pb.sol

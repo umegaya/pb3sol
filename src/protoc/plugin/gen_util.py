@@ -148,7 +148,7 @@ def add_prefix(prefix, name, sep = "_"):
 def parse_urllike_parameter(s):
     ret = {} #hash
     if s:
-        for e in s.split('&'):
+        for e in s.encode('ascii').split('&'):
             kv = e.split('=')
             ret[kv[0]] = kv[1]
     return ret
@@ -245,3 +245,6 @@ def gen_soltype_estimate_len(sol_type):
     val = SolType2BodyLen.get(sol_type, 0)
     return val + 3
 
+def change_pb_libname(new_name):
+    global PB_LIB_NAME
+    PB_LIB_NAME = new_name

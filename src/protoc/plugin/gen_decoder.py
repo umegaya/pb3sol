@@ -91,8 +91,7 @@ def gen_inner_decoder(msg, parent_struct_name):
 def gen_field_reader(f, parent_struct_name, msg):
     suffix = ("[ r.{field}.length - counters[{i}] ]").format(field = f.name, i = f.number) if util.field_is_repeated(f) else ""
     return (
-        "  function _read_{field}(uint p, bytes bs, {t} r, uint[{n}] counters)\n"
-        "      internal constant returns (uint) {{                            \n"
+        "  function _read_{field}(uint p, bytes bs, {t} r, uint[{n}] counters) internal constant returns (uint) {{                            \n"
         "    var (x, sz) = {decoder}(p, bs);                                  \n"
         "    if(isNil(r)) {{                                                  \n" 
         "      counters[{i}] += 1;                                            \n"

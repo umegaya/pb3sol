@@ -1,4 +1,5 @@
 var Version1 = artifacts.require('Version1');
+var Version2 = artifacts.require('Version2');
 var Storage = artifacts.require('Storage');
 
 contract('Storage', function(accounts) {
@@ -21,13 +22,14 @@ contract('Storage', function(accounts) {
         });
     });
 });
-contract('Version1', function(accounts) {
-    it("should put/get pb.Rewards", function() {
+contract('Versions', function(accounts) {
+    it("should put/get pb.Rewards even if schema changes", function() {
         var c;
+        //first create bytes object with version1 schema
         return Version1.deployed(Storage.address).then(function(instance) {
             c = instance;
             return c.addReward("reward1");
-        }).then(function() {
+        }).then(function(ret) {
             return c.loadReward("reward1");
         }).then(function(ret) {
             return c.getId.call(0);
@@ -36,6 +38,27 @@ contract('Version1', function(accounts) {
             return c.getF3.call(1);
         }).then(function(ret) {
             assert.equal(ret.toNumber(), 444, "f3[1] should return 444");
+            //then, load it with version2 schema (with convert)
+            var c2;
+            return Version2.deployed(Storage.address).then(function(instance) {
+                c2 = instance;
+                return c2.loadReward("reward1");
+            }).then(function () {
+                return c2.getNewId.call();
+            }).then(function (ret) {
+                assert.equal(ret.toNumber(), 123, "new_id should return 123");
+                return c.getF3.call(1);
+            }).then(function(ret) {
+                assert.equal(ret.toNumber(), 444, "f3[1] should return 444");
+            }).then(function() {
+                return c2.addReward("reward2");
+            }).then(function () {
+                return c2.loadReward("reward2");
+            }).then(function () {
+                return c2.getNewId.call();
+            }).then(function (ret) {
+                assert.equal(ret.toNumber(), 123456, "brand new new_id should return 123456");
+            });
         });
     });
 });

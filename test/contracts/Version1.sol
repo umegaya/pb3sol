@@ -28,6 +28,11 @@ contract Version1 is StorageAccessor {
         tmp = pb.decodeRewards(b);
     }
 
+    function loadRewardLen(string key) public view reader returns (uint256) {
+        bytes memory b = loadBytesByString(key);
+        return b.length;
+    }
+
     function getId(uint idx) public view reader returns (uint256) {
         return tmp.id[idx];
     }

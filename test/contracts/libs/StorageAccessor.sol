@@ -2,9 +2,8 @@ pragma solidity ^0.4.17;
 
 import "./Restrictable.sol";
 import "./Storage.sol";
-import "./Console.sol";
 
-contract StorageAccessor is Restrictable, Console {
+contract StorageAccessor is Restrictable {
     uint internal constant LOAD_CHUNK_SIZE = 256; //should match with Storage.LOAD_CHUNK_SIZE
     Storage public storageContract; //Storage contract
 

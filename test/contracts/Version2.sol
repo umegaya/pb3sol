@@ -17,16 +17,21 @@ contract Version2 is StorageAccessor {
         r.f3[0] = 333;
         r.f3[1] = 444;
         r.new_id = 123456;
-        Storage(storageContract).setBytes(key, pb.encodeRewards(r));
+        saveBytesByString(key, pb.encodeRewards(r));
     }
 
     function loadReward(string key) public writer {
-        bytes memory b = loadBytes(key);
+        bytes memory b = loadBytesByString(key);
         tmp = pb.decodeRewards(b);
         if (tmp.new_id == 0) {
             tmp.new_id = tmp.id[0];
-            Storage(storageContract).setBytes(key, pb.encodeRewards(tmp));
+            saveBytesByString(key, pb.encodeRewards(tmp));
         }
+    }
+
+    function loadRewardLen(string key) public view reader returns (uint256) {
+        bytes memory b = loadBytesByString(key);
+        return b.length;
     }
 
     function getId(uint idx) public view reader returns (uint256) {

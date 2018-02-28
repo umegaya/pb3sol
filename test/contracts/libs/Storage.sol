@@ -10,55 +10,64 @@ contract Storage is Restrictable {
     function Storage() public {
     }
 
-    function getBytes(string key) public view reader returns (bytes) {
+    function getBytesByString(string key) public view reader returns (bytes) {
         return stringMap[key];
     }
-    function getBytes(string key, uint offset) public view reader returns (byte[256], uint) {
+    function getRangeBytesByString(string key, uint offset) public view reader returns (byte[256], uint) {
         bytes memory bs = stringMap[key];
         byte[256] memory rbs;
         uint remain = bs.length - offset;
         if (remain < 0) {
-            revert();
+            return (rbs, 0);
+        } else if (remain > 256) {
+            remain = offset + 256;
+        } else {
+            remain = bs.length;
         }
         for (uint i = offset; i < remain; i++) {
             rbs[i - offset] = bs[i];
         }
         return (rbs, remain);
     }
-    function getBytesLength(string key) public view reader returns (uint) {
+    function getBytesLengthByString(string key) public view reader returns (uint) {
         bytes memory bs = stringMap[key];
         return bs.length;        
     }
 
-    function getBytes(int64 key) public view reader returns (bytes) {
+    function getBytesByInt64(int64 key) public view reader returns (bytes) {
         return integerMap[key];
     }
-    function getBytes(int64 key, uint offset) public view reader returns (byte[256], uint) {
+    function getRangeBytesByInt64(int64 key, uint offset) public view reader returns (byte[256], uint) {
         bytes memory bs = integerMap[key];
         byte[256] memory rbs;
         uint remain = bs.length - offset;
         if (remain < 0) {
-            revert();
+            return (rbs, 0);
+        } else if (remain > 256) {
+            remain = offset + 256;
+        } else {
+            remain = bs.length;
         }
         for (uint i = offset; i < remain; i++) {
             rbs[i - offset] = bs[i];
         }
         return (rbs, remain);
     }
-    function getBytesLength(int64 key) public view reader returns (uint) {
+    function getBytesLengthByInt64(int64 key) public view reader returns (uint) {
         bytes memory bs = integerMap[key];
         return bs.length;        
     }
 
-    function setBytes(string key, bytes data) public writer returns (bytes) {
+    function setBytesByString(string key, bytes data) public writer returns (bool) {
         bytes memory prev = stringMap[key];
         stringMap[key] = data;
-        return prev;
+        assert(stringMap[key].length > 0);
+        return prev.length > 0;
     }
 
-    function setBytes(int64 key, bytes data) public writer returns (bytes) {
+    function setBytesByInt64(int64 key, bytes data) public writer returns (bool) {
         bytes memory prev = integerMap[key];
         integerMap[key] = data;
-        return prev;
+        return prev.length > 0;
     }
 }

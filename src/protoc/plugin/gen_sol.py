@@ -138,11 +138,8 @@ SOLIDITY_NATIVE_TYPEDEFS = "Solidity.proto"
 RUNTIME_FILE_NAME = "runtime.sol"
 GEN_RUNTIME = False
 def apply_options(params_string):
-    pp.pprint("params:{}".format(params_string))
     params = util.parse_urllike_parameter(params_string)
-    pp.pprint(params)
     if "gen_runtime" in params:
-        pp.pprint("find gen_runtime")
         global GEN_RUNTIME
         GEN_RUNTIME = True
         name = params["gen_runtime"]
@@ -150,7 +147,6 @@ def apply_options(params_string):
             global RUNTIME_FILE_NAME
             RUNTIME_FILE_NAME = name
     if "pb_libname" in params:
-        pp.pprint("find pb_libname")
         util.change_pb_libname(params["pb_libname"])
 
 
@@ -158,7 +154,6 @@ def generate_code(request, response):
     generated = 0
 
     apply_options(request.parameter)
-    pp.pprint('settings:{}, {}'.format(RUNTIME_FILE_NAME, GEN_RUNTIME))
     
     for proto_file in request.proto_file:
         # skip native solidity type definition

@@ -5,11 +5,11 @@ import "./libs/pb/TaskList_pb.sol";
 
 contract Version1 is StorageAccessor {
     pb.Rewards public tmp;
-
+    
 	function Version1(address storageAddress) StorageAccessor(storageAddress) public {
     }
 
-    function addReward(string key) public writer {
+    function addReward(string key) public writer returns (uint256) {
         pb.Rewards memory r;
         r.id = new uint256[](2);
         r.id[0] = 123;
@@ -19,11 +19,12 @@ contract Version1 is StorageAccessor {
         r.f3 = new int64[](2);
         r.f3[0] = 333;
         r.f3[1] = 444;
-        saveBytes(key, pb.encodeRewards(r));
+        saveBytesByString(key, pb.encodeRewards(r));
+        return r.id[0];
     }
 
     function loadReward(string key) public writer {
-        bytes memory b = loadBytes(key);
+        bytes memory b = loadBytesByString(key);
         tmp = pb.decodeRewards(b);
     }
 

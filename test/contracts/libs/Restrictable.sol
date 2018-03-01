@@ -1,9 +1,9 @@
 pragma solidity ^0.4.17;
 
 contract Restrictable {
+    enum Privilege { None, Read, Write }
     address public administrator;
-    mapping (address => bool) public writers;
-    mapping (address => bool) public readers;
+    mapping (address => Privilege) public members;
 
     function Restrictable() public {
         administrator = msg.sender;
@@ -15,12 +15,12 @@ contract Restrictable {
     }
 
     modifier writer {
-        require(true || msg.sender == administrator || writers[msg.sender] == true);
+        require(msg.sender == administrator || uint(members[msg.sender]) >= uint(Privilege.Write));
         _;
     }
 
     modifier reader {
-        require(true || msg.sender == administrator || writers[msg.sender] == true || readers[msg.sender] == true);
+        require(msg.sender == administrator || uint(members[msg.sender]) >= uint(Privilege.Read));
         _;
     }
 
@@ -30,27 +30,9 @@ contract Restrictable {
         }
     }
 
-    function addWriter(address newWriter) public writer {
-        if (writers[newWriter] == false) {
-            writers[newWriter] = true;
-        }
-    }
-
-    function removeWriter(address oldWriter) public writer {
-        if (writers[oldWriter] == true) {
-            writers[oldWriter] = false;
-        }
-    }
-
-    function addReader(address newReader) public writer {
-        if (readers[newReader] == false) {
-            readers[newReader] = true;
-        }
-    }
-
-    function removeReader(address oldReader) public writer {
-        if (readers[oldReader] == true) {
-            readers[oldReader] = false;
+    function setPrivilege(address member, Privilege p) public writer {
+        if (uint(p) <= uint(Privilege.Write)) {
+            members[member] = p;
         }
     }
 }

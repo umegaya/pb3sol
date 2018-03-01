@@ -8,16 +8,7 @@ contract StorageAccessor is Restrictable {
     Storage public storageContract; //Storage contract
 
     function StorageAccessor(address storageAddress) Restrictable() public {
-        //log("ctor executed with", msg.sender);
         storageContract = Storage(storageAddress);
-        //set writer permission to storage. 
-        //thus, deployer should be owner of storageAddress
-        /*if (Storage(storageContract).administrator() == msg.sender) {
-            log("ctor executed with admin", msg.sender);
-        } else {
-            log("ctor not executed with admin", msg.sender);
-        }
-        Storage(storageContract).addWriter(this);*/
     }
 
     function saveBytesByString(string key, bytes memory b) internal {

@@ -29,6 +29,15 @@ contract('Versions', function(accounts) {
         return Version1.deployed(Storage.address).then(function(instance) {
             c = instance;
             return c.addReward("reward1");
+        }).then(function (ret) {
+            assert(false, "should not success without write privilege");
+        }, function (err) {
+            console.log("recover failure by giving write privilege to", Version1.address.toString());
+            return Storage.deployed().then(function(storage_instance) {
+                return storage_instance.setPrivilege(Version1.address, 2);
+            });
+        }).then(function(ret) {
+            return c.addReward("reward1");
         }).then(function(ret) {
             return c.loadReward("reward1");
         }).then(function(ret) {
@@ -42,6 +51,10 @@ contract('Versions', function(accounts) {
             var c2;
             return Version2.deployed(Storage.address).then(function(instance) {
                 c2 = instance;
+                return Storage.deployed().then(function(storage_instance) {
+                    return storage_instance.setPrivilege(Version2.address, 2);
+                });
+            }).then(function () {
                 return c2.loadReward("reward1");
             }).then(function () {
                 return c2.getNewId.call();

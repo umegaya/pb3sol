@@ -7,9 +7,9 @@ contract Storage is Restrictable {
     mapping (string => bytes) stringMap;
     mapping (int64 => bytes) integerMap;
 
-    function Storage() public {
+    function Storage() Restrictable() public {
     }
-    
+
     function getBytesByString(string key) public view reader returns (bytes) {
         return stringMap[key];
     }

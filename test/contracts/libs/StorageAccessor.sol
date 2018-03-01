@@ -14,9 +14,6 @@ contract StorageAccessor is Restrictable {
     function saveBytesByString(string key, bytes memory b) internal {
         storageContract.setBytesByString(key, b);
     }
-    function saveBytesByInt64(int64 key, bytes memory b) internal {
-        storageContract.setBytesByInt64(key, b);        
-    }
     //after ABIEncoderV2 gets default, 
     //these codes will become just proxy for Storage(storageContract).getBytes(key)
     function loadBytesByString(string key) internal view reader returns (bytes) {
@@ -30,18 +27,6 @@ contract StorageAccessor is Restrictable {
             }
         }
         return ret; 
-    }
-    function loadBytesByInt64(int64 key) internal view reader returns (bytes) {
-        uint length = storageContract.getBytesLengthByInt64(key);
-        uint offset = 0;
-        bytes memory ret = new bytes(length);
-        for (;length > offset; offset += LOAD_CHUNK_SIZE) {
-            var (chunk, clen) = storageContract.getRangeBytesByInt64(key, offset);
-            for (uint i = 0; i < clen; i++) {
-                ret[offset + i] = chunk[i];
-            }
-        }
-        return ret;
     }
 }
 //*/

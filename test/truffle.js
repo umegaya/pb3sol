@@ -3,11 +3,9 @@ module.exports = {
     development: {
       //assume user uses ganache ethereum client with default setting
       host: "localhost",
-      port: 9545, 
+      port: 7545, 
       network_id: "*", // Match any network id
-      gas: 4e8,
-		  gasPrice: 2e10,
-      gasLimit: 4e7,
+      gas: 4600000,
     }
   }
 };

@@ -9,7 +9,7 @@ contract Storage is Restrictable {
 
     function Storage() public {
     }
-
+    
     function getBytesByString(string key) public view reader returns (bytes) {
         return stringMap[key];
     }

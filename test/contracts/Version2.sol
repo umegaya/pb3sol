@@ -4,28 +4,29 @@ import "./libs/StorageAccessor.sol";
 import "./libs/pb/TaskList2_pb.sol";
 
 contract Version2 is StorageAccessor {
-    pb.Rewards public tmp;
+    pb2_Rewards.Data public tmp;
 
 	function Version2(address storageAddress) StorageAccessor(storageAddress) public {
     }
 
+    //below code will cost about 2.4M gas
     function addReward(string key) public writer {
-        pb.Rewards memory r;
+        pb2_Rewards.Data memory r;
         r.f1 = 111;
         r.f2 = 222;
         r.f3 = new int64[](2);
         r.f3[0] = 333;
         r.f3[1] = 444;
         r.new_id = 123456;
-        saveBytesByString(key, pb.encodeRewards(r));
+        saveBytesByString(key, pb2_Rewards.encode(r));
     }
 
     function loadReward(string key) public writer {
         bytes memory b = loadBytesByString(key);
-        tmp = pb.decodeRewards(b);
+        tmp = pb2_Rewards.decode(b);
         if (tmp.new_id == 0) {
             tmp.new_id = tmp.id[0];
-            saveBytesByString(key, pb.encodeRewards(tmp));
+            saveBytesByString(key, pb2_Rewards.encode(tmp));
         }
     }
 

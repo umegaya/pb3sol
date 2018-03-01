@@ -46,7 +46,7 @@ def gen_inner_array_allocator(f, parent_struct_name):
     return (
         "    r.{field} = new {t}(counters[{i}]);\n"
     ).format(
-        t = util.gen_internal_type_from_field(f),
+        t = util.gen_global_type_from_field(f),
         field = f.name,
         i = f.number,
     )
@@ -114,25 +114,24 @@ def gen_field_reader(f, parent_struct_name, msg):
 def gen_field_readers(msg, parent_struct_name):
     return ''.join(list(map(lambda f: gen_field_reader(f, parent_struct_name, msg), msg.field)))
 
-def gen_struct_decoder(f, parent_struct_name):
-    ftname = util.gen_base_fieldtype(f)
+def gen_struct_decoder(f, msg, parent_struct_name):
     return (
-        "  function _decode_{name}(uint p, bytes bs)            \n"
-        "      internal constant returns ({t}, uint) {{         \n"
+        "  function {name}(uint p, bytes bs)            \n"
+        "      internal constant returns ({struct}, uint) {{    \n"
         "    var (sz, bytesRead) = _pb._decode_varint(p, bs);   \n"
         "    p += bytesRead;                                    \n"
         "    var (r,) = {lib}._decode(p, bs, sz);               \n"
         "    return (r, sz + bytesRead);                        \n"
         "  }}      \n"
     ).format(
-        name = ftname,
-        t = util.gen_internal_struct_name_from_field(f),
-        lib = util.gen_delegate_lib_name_from_struct(ftname)
+        struct = util.gen_global_type_name_from_field(f),
+        name = util.gen_struct_decoder_name_from_field(f),
+        lib = util.gen_struct_codec_lib_name_from_field(f)
     )
 
 def gen_struct_decoders(msg, parent_struct_name):
     return ''.join(list(map(
-        (lambda f: gen_struct_decoder(f, parent_struct_name) if util.field_is_message(f) else ""), msg.field)))
+        (lambda f: gen_struct_decoder(f, msg, parent_struct_name) if util.field_is_message(f) else ""), msg.field)))
 
 
 def gen_decoder_section(msg, parent_struct_name):

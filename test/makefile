@@ -12,10 +12,10 @@ proto:
 
 test_proto: proto
 	sed -e 's/sfixed32 f4 = 5;/sfixed32 f4 = 5;.solidity.uint256 new_id = 6;/g' proto/TaskList.proto > proto/TaskList2.proto
-	$(call soliditize,/in/TaskList2.proto,"/out")
+	$(call soliditize,/in/TaskList2.proto,"pb_libname=pb2:/out")
 
 shell:
-	docker run --rm -ti -v `pwd`/contracts/libs:/out -v `pwd`/proto:/in -v `pwd`/../src/protoc:/protoc ${CONTAINER} bash
+	docker run --rm -ti -v `pwd`/contracts/libs/pb:/out -v `pwd`/proto:/in -v `pwd`/../src/protoc:/protoc ${CONTAINER} bash
 
 run: test_proto
 	truffle test

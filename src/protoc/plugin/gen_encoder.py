@@ -86,11 +86,10 @@ def gen_field_scalar_size(f):
 				field = fname
 			)
 		elif vt == "message":
-			ft = util.gen_base_fieldtype(f)
 			st = util.field_sol_type(f)
 			if st is None:
 				return ("_pb._sz_lendelim({lib}._estimate(r.{field}))").format(
-					lib = util.gen_delegate_lib_name_from_struct(ft),
+					lib = util.gen_struct_codec_lib_name_from_field(f),
 					field = fname,
 				)
 			else:

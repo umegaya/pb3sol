@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, itertools, json, re
+import os, sys
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4, stream=sys.stderr)
@@ -19,11 +19,10 @@ def gen_fields(msg):
 def gen_struct_definition(msg, parent_struct_name):
     return (
         "  //struct definition\n"
-        "  struct {name} {{   \n"
+        "  struct Data {{   \n"
         "{fields}             \n" # TODO. add indent for 2nd+ field
         "  }}                 "
     ).format(
-        name=util.gen_struct_name(msg, parent_struct_name),
         fields=gen_fields(msg)
     )
 
@@ -61,7 +60,7 @@ def gen_store_code_for_field(f, parent_struct_name):
             field = f.name,
         )
 
-    libname = util.gen_delegate_lib_name_from_struct(util.gen_base_fieldtype(f))
+    libname = util.gen_struct_codec_lib_name_from_field(f)
 
     return tmpl.format(
         i = f.number,
@@ -87,11 +86,12 @@ def gen_codec(msg, main_codecs, delegate_codecs, parent_struct_name = None):
     #sys.stderr.write(('----------------------- get codec ({0}) --------------------------').format(parent_struct_name))
     #pp.pprint(msg)
 
-    delegate_lib_name = util.gen_delegate_lib_name_from_struct(util.gen_struct_name(msg, parent_struct_name))
+    delegate_lib_name = util.gen_delegate_lib_name(msg, parent_struct_name)
 
     # delegate codec
     delegate_codecs.append((
         "library {delegate_lib_name}{{\n"
+        "{struct_definition}          \n"
         "{decoder_section}            \n"
         "{encoder_section}            \n"
         "{store_function}             \n"
@@ -99,34 +99,11 @@ def gen_codec(msg, main_codecs, delegate_codecs, parent_struct_name = None):
         "}} //library {delegate_lib_name}\n"
     ).format(
         delegate_lib_name=delegate_lib_name, 
+        struct_definition=gen_struct_definition(msg, parent_struct_name),
         decoder_section=gen_decoder_section(msg, parent_struct_name),
         encoder_section=gen_encoder_section(msg, parent_struct_name),
         store_function=gen_store_function(msg, parent_struct_name),
         utility_functions=gen_utility_functions(msg, parent_struct_name)
-    ))
-
-    # main codec interface
-    main_codecs.append(gen_struct_definition(msg, parent_struct_name))
-    main_codecs.append((
-        "  //main codec\n"
-        "  function decode{struct}(bytes bs) internal constant returns({struct}){{\n"
-        "    {struct} memory r;                                                   \n"
-        "    var x = {lib}.decode(bs);                                            \n"
-        "    assembly {{ r := x }}                                                \n"
-        "    return r;                                                            \n"
-        "  }}                                                                     \n"
-        "  function encode{struct}({struct} x) internal constant returns(bytes) {{\n"
-        "    {struct} memory xx;                                                  \n"
-        "    assembly {{ xx := x }}                                               \n"
-        "    return {lib}.encode(xx);                                             \n"
-        "  }}                                                                     \n"
-        "  function store{struct}({struct} memory input, {struct} storage output) \n"
-        "      internal constant {{                                               \n"
-        "    return {lib}.store(input, output);                                 \n"
-        "  }}                                                                     \n"
-    ).format( 
-        struct=util.gen_struct_name(msg, parent_struct_name), 
-        lib=delegate_lib_name
     ))
 
     for nested in msg.nested_type:
@@ -147,7 +124,7 @@ def apply_options(params_string):
             global RUNTIME_FILE_NAME
             RUNTIME_FILE_NAME = name
     if "pb_libname" in params:
-        util.change_pb_libname(params["pb_libname"])
+        util.change_pb_libname_prefix(params["pb_libname"])
 
 
 def generate_code(request, response):
@@ -162,6 +139,9 @@ def generate_code(request, response):
         # main output
         output = []
 
+        # set package name if any
+        util.change_package_name(proto_file.package)
+
         # generate sol library
         # prologue
         output.append('pragma solidity ^{0};'.format(util.SOLIDITY_VERSION))
@@ -170,22 +150,18 @@ def generate_code(request, response):
             if SOLIDITY_NATIVE_TYPEDEFS in dep:
                 continue
             output.append('import "./{0}";'.format(dep.replace('.proto', '_pb.sol')))
-        output.append('library {0} {{'.format(util.PB_LIB_NAME))
 
         # generate per message codes
-        I="\t" # indent constant
         main_codecs = []
         delegate_codecs = []
         for msg in proto_file.message_type:
             gen_codec(msg, main_codecs, delegate_codecs)
         
         # epilogue
-        output = output + main_codecs
-        output.append(('}} //library {0}\n').format(util.PB_LIB_NAME))
         output = output + delegate_codecs
       
 
-        if len(main_codecs) > 0: # if it has any contents, output pb.sol file
+        if len(delegate_codecs) > 0: # if it has any contents, output pb.sol file
             # Fill response
             basepath = os.path.basename(proto_file.name)
             f = response.file.add()

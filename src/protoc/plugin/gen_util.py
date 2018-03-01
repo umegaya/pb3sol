@@ -1,3 +1,8 @@
+import re, sys
+import pprint
+pp = pprint.PrettyPrinter(indent=4, stream=sys.stderr)
+
+
 Label2Value = {
     "LABEL_OPTIONAL": 1,
     "LABEL_REQUIRED": 2,
@@ -118,30 +123,11 @@ SolType2BodyLen = {
 }
 
 TYPE_MESSAGE = 11
-PB_LIB_NAME = "pb"
+PB_LIB_NAME_PREFIX = "pb"
+PB_CURRENT_PACKAGE = ""
 SOLIDITY_VERSION = "0.4.0"
 
 # utils
-def traverse(proto_file):
-    def _traverse(package, items):
-        for item in items:
-            yield item, package
-
-            if isinstance(item, DescriptorProto):
-                for enum in item.enum_type:
-                    yield enum, package
-
-                for nested in item.nested_type:
-                    nested_package = package + item.name
-
-                    for nested_item in _traverse(nested, nested_package):
-                        yield nested_item, nested_package
-
-    return itertools.chain(
-        _traverse(proto_file.package, proto_file.enum_type),
-        _traverse(proto_file.package, proto_file.message_type),
-    )
-
 def add_prefix(prefix, name, sep = "_"):
     return ("" if (prefix is None) else (prefix + sep)) + name 
 
@@ -177,46 +163,54 @@ def field_sol_type(f):
     else:
         return None
 
-def gen_delegate_lib_name_from_struct(struct_name):
-    return struct_name + "Codec"
+def prefix_lib_and_package(name):
+    return PB_LIB_NAME_PREFIX + PB_CURRENT_PACKAGE + "_" + name
 
-def gen_struct_name(msg, parent_struct_name):
-    return add_prefix(parent_struct_name, msg.name)
+def gen_delegate_lib_name(msg, parent_struct_name):
+    return prefix_lib_and_package(add_prefix(parent_struct_name, msg.name))
 
-def gen_internal_struct_name_from_field(field):
-    val = Num2Type.get(field.type, None)
-    if val != None:
-        return val
-    val = field_sol_type(field)
-    if val != None:
-        return val
-    return PB_LIB_NAME + "." + field.type_name[1:].replace(".", "_")
+def gen_global_type_name_from_field(field):
+    ftid, is_usertype = gen_field_type_id(field)
+    return prefix_lib_and_package(ftid) + ".Data" if is_usertype else ftid
 
-def gen_internal_type_from_field(field):
-    t = gen_internal_struct_name_from_field(field)
+def gen_global_type_from_field(field):
+    t = gen_global_type_name_from_field(field)
+    if t is None:
+        pp.pprint(field)
+        pp.pprint("will die ======================================= ")
     if field_is_repeated(field):
         return t + "[]"
     else:
         return t
 
 def gen_internal_struct_name(msg, parent_struct_name):
-    return PB_LIB_NAME + "." + gen_struct_name(msg, parent_struct_name)
+    return "Data"
 
-def gen_base_fieldtype(field):
+def gen_field_type_id(field):
     val = Num2Type.get(field.type, None)
     if val != None:
-        return val
+        return (val, False)
     val = field_sol_type(field)
     if val != None:
-        return val
-    return field.type_name[1:].replace(".", "_")
+        return (val, False)
+    return (field.type_name[1:].replace(".", "_"), True)
 
 def gen_fieldtype(field):
-    t = gen_base_fieldtype(field)
+    t = gen_global_type_name_from_field(field)
     if field_is_repeated(field):
         return t + "[]"
     else:
         return t
+
+def gen_struct_decoder_name_from_field(field):
+    ftid, _ = gen_field_type_id(field)
+    return "_decode_" + ftid
+
+def gen_struct_codec_lib_name_from_field(field):
+    ftid, is_usertype = gen_field_type_id(field)
+    if not is_usertype:
+        "___{} is not user type ({})___".format(field.name, ftid)
+    return prefix_lib_and_package(ftid)
 
 def gen_decoder_name(field):
     val = Num2Type.get(field.type, None)
@@ -236,7 +230,7 @@ def gen_encoder_name(field):
         val = field_sol_type(field)
         if val != None:
             return "_pb._encode_sol_" + val
-        return gen_delegate_lib_name_from_struct(gen_base_fieldtype(field)) + "._encode_nested"
+        return gen_struct_codec_lib_name_from_field(field) + "._encode_nested"
 
 def gen_wire_type(field):
     return Num2WireType.get(field.type, None)
@@ -245,6 +239,13 @@ def gen_soltype_estimate_len(sol_type):
     val = SolType2BodyLen.get(sol_type, 0)
     return val + 3
 
-def change_pb_libname(new_name):
-    global PB_LIB_NAME
-    PB_LIB_NAME = new_name
+def change_pb_libname_prefix(new_name):
+    global PB_LIB_NAME_PREFIX
+    PB_LIB_NAME_PREFIX = new_name
+
+def change_package_name(new_name):
+    if new_name:
+        global PB_CURRENT_PACKAGE
+        PB_CURRENT_PACKAGE = "_" + new_name.replace(".", "_")
+    else:
+        PB_CURRENT_PACKAGE = ""

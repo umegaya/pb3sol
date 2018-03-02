@@ -2,7 +2,7 @@ image:
 	make -C src image
 
 tsh:
-	make -C test shell
+	docker run --rm -ti -v `pwd`:/test umegaya/pb3sol_test bash
 
 test_setup:
 	cd src/soltype-pb && npm install

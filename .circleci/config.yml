@@ -10,4 +10,5 @@ jobs:
       - image: umegaya/pb3sol_test
     steps:
       - run: git clone https://github.com/umegaya/pb3sol
+      - run: rm -r /protoc && cp -r pb3sol/src/protoc /protoc
       - run: cd pb3sol && make test_on_host

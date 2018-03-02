@@ -1,0 +1,17 @@
+{
+  "name": "pb3sol_test",
+  "version": "0.1.0",
+  "description": "",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "author": "Takehiro Iyatomi",
+  "license": "ISC",
+  "dependencies": {
+    "protobufjs": "^6.8.6"
+  }
+}

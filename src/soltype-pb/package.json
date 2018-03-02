@@ -1,0 +1,27 @@
+{
+  "name": "soltype-pb",
+  "version": "0.1.0",
+  "description": "helper for handling solidity native type with protobufjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umegaya/pb3sol.git"
+  },
+  "keywords": [
+    "protobuf",
+    "solidity",
+    "js"
+  ],
+  "author": "umegaya (iyatomi at gmail.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/umegaya/pb3sol/issues"
+  },
+  "homepage": "https://github.com/umegaya/pb3sol#readme",
+  "dependencies": {
+    "big-integer": "^1.6.26"
+  }
+}

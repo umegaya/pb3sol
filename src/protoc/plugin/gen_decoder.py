@@ -2,11 +2,16 @@ import gen_util as util
 
 def gen_main_decoder(msg, parent_struct_name):
     return (
-        "  function decode(bytes bs) internal constant returns ({name}) {{\n"
+        "  function decode(bytes bs) {visibility} constant returns ({name}) {{\n"
         "    var (x,) = _decode(32, bs, bs.length);                       \n"
         "    return x;                                                    \n"
+        "  }}\n"
+        "  function decode({name} storage self, bytes bs) {visibility} constant {{\n"
+        "    var (x,) = _decode(32, bs, bs.length);                    \n"
+        "    store(x, self);                                           \n"
         "  }}"
     ).format(
+        visibility = util.gen_visibility(True),
         name = util.gen_internal_struct_name(msg, parent_struct_name)
     )
 

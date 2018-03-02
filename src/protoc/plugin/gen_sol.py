@@ -125,7 +125,8 @@ def apply_options(params_string):
             RUNTIME_FILE_NAME = name
     if "pb_libname" in params:
         util.change_pb_libname_prefix(params["pb_libname"])
-
+    if "for_linking" in params:
+        util.set_lib_linking_mode()
 
 def generate_code(request, response):
     generated = 0

@@ -4,6 +4,7 @@ import "./libs/StorageAccessor.sol";
 import "./libs/pb/TaskList2_pb.sol";
 
 contract Version2 is StorageAccessor {
+    //library method call style
     pb2_Rewards.Data public tmp;
 
 	function Version2(address storageAddress) StorageAccessor(storageAddress) public {

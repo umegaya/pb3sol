@@ -792,5 +792,4 @@ library _pb {
     uint8 r; assembly { r := x }
     return r;
   }
-
 }

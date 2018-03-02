@@ -125,6 +125,7 @@ SolType2BodyLen = {
 TYPE_MESSAGE = 11
 PB_LIB_NAME_PREFIX = "pb"
 PB_CURRENT_PACKAGE = ""
+LIBRARY_LINKING_MODE = False
 SOLIDITY_VERSION = "0.4.0"
 
 # utils
@@ -249,3 +250,19 @@ def change_package_name(new_name):
         PB_CURRENT_PACKAGE = "_" + new_name.replace(".", "_")
     else:
         PB_CURRENT_PACKAGE = ""
+
+def is_lib_linking_mode():
+    global LIBRARY_LINKING_MODE
+    return LIBRARY_LINKING_MODE
+
+def set_lib_linking_mode():
+    global LIBRARY_LINKING_MODE
+    # disable for now because cannot return arbiter struct and 
+    # dynamic length bytes array until solidity 0.4.21
+    # LIBRARY_LINKING_MODE = True
+    LIBRARY_LINKING_MODE = False
+
+def gen_visibility(is_decoder):
+    if not LIBRARY_LINKING_MODE:
+        return "internal"
+    return "internal" if is_decoder else ""

@@ -4,6 +4,8 @@ import "./libs/StorageAccessor.sol";
 import "./libs/pb/TaskList_pb.sol";
 
 contract Version1 is StorageAccessor {
+    //instance method style
+    using pb_Rewards for pb_Rewards.Data;
     pb_Rewards.Data public tmp;
     
 	function Version1(address storageAddress) StorageAccessor(storageAddress) public {
@@ -19,13 +21,13 @@ contract Version1 is StorageAccessor {
         r.f3 = new int64[](2);
         r.f3[0] = 333;
         r.f3[1] = 444;
-        saveBytesByString(key, pb_Rewards.encode(r));
+        saveBytesByString(key, r.encode());
         return r.id[0];
     }
 
     function loadReward(string key) public writer {
         bytes memory b = loadBytesByString(key);
-        tmp = pb_Rewards.decode(b);
+        tmp.decode(b);
     }//*/
 
     function getId(uint idx) public view reader returns (uint256) {

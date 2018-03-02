@@ -3,13 +3,14 @@ import gen_util as util
 
 def gen_main_encoder(msg, parent_struct_name):
 	return (
-		"  function encode({struct} r) internal constant returns (bytes) {{\n"
-		"    bytes memory bs = new bytes(_estimate(r));                    \n"
+		"  function encode({struct} r) {visibility} constant returns (bytes) {{\n"
+		"    bytes memory bs = new bytes(_estimate(r));					   \n"
 		"    uint sz = _encode(r, 32, bs);                                 \n"
 		"    assembly {{ mstore(bs, sz) }}                                 \n"
 		"    return bs;                                                    \n"
 		"  }}                                                              \n"
 	).format(
+		visibility = util.gen_visibility(False),
 		struct = util.gen_internal_struct_name(msg, parent_struct_name),
 	)
 

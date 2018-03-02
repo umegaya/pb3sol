@@ -1,3 +1,4 @@
+*.bk
 proto/TaskList2.proto
 build
 contracts/libs/pb/*.sol

@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    branches:
+      only:
+        - master
+        - /v[0-9\.]+/
+        - /rc-.*/
+    docker:
+      - image: umegaya/pb3sol_test
+    steps:
+      - run: git clone https://github.com/umegaya/pb3sol
+      - run: cd pb3sol && make test_on_host

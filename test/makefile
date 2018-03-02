@@ -13,7 +13,7 @@ proto:
 	$(call soliditize,${INPUT_DIR}/TaskList.proto,gen_runtime=True:${OUTPUT_DIR})
 
 test_proto: proto
-	sed -e 's/sfixed32 f4 = 5;/sfixed32 f4 = 5;.solidity.uint256 new_id = 6;/g' proto/TaskList.proto > proto/TaskList2.proto
+	sed -e 's/.solidity.int128 f4 = 5;/.solidity.int128 f4 = 5;.solidity.uint256 new_id = 6;/g' proto/TaskList.proto > proto/TaskList2.proto
 	$(call soliditize,${INPUT_DIR}/TaskList2.proto,pb_libname=pb2:${OUTPUT_DIR})
 
 shell:
@@ -21,7 +21,6 @@ shell:
 
 run: test_proto
 	truffle develop --log &
-	sed -i.bk -e 's/7545/9545/g' truffle.js
 	truffle test
 
 image:

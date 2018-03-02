@@ -2,6 +2,17 @@ var Version1 = artifacts.require('Version1');
 var Version2 = artifacts.require('Version2');
 var Storage = artifacts.require('Storage');
 
+var protobuf = require("protobufjs");
+var soltype = require(__dirname + "/../../src/soltype-pb");
+
+var origResolvePath = protobuf.Root.prototype.resolvePath;
+protobuf.Root.prototype.resolvePath = function (filename, path) {
+    if (path.endsWith("Solidity.proto")) {
+        return origResolvePath(filename, __dirname + "/../../src/protoc/include/Solidity.proto");
+    }
+    return origResolvePath(filename, path);
+}
+
 contract('Storage', function(accounts) {
     it("can deploy Storage contract", function() {
         var c, log;
@@ -24,7 +35,8 @@ contract('Storage', function(accounts) {
 });
 contract('Versions', function(accounts) {
     it("should put/get pb.Rewards even if schema changes", function() {
-        var c;
+        var c, sc;
+        var proto;
         //first create bytes object with version1 schema
         return Version1.deployed(Storage.address).then(function(instance) {
             c = instance;
@@ -34,6 +46,7 @@ contract('Versions', function(accounts) {
         }, function (err) {
             console.log("recover failure by giving write privilege to", Version1.address.toString());
             return Storage.deployed().then(function(storage_instance) {
+                sc = storage_instance;
                 return storage_instance.setPrivilege(Version1.address, 2);
             });
         }).then(function(ret) {
@@ -41,13 +54,47 @@ contract('Versions', function(accounts) {
         }).then(function(ret) {
             return c.loadReward("reward1");
         }).then(function(ret) {
-            return c.getId.call(0);
+            return c.check.call();
+        //test interoperability with protobufjs
+        }).then(function (ret) {
+            assert.equal(ret.toNumber(), 0, "check fails with (" + ret.toNumber() + ")");
+            return new Promise(function (resolve, reject) {
+                protobuf.load("proto/TaskList.proto", function(err, proto) {
+                    if (err) { reject(err); }
+                    else { 
+                        soltype(proto); //add solidity type definition
+                        resolve(proto); 
+                    }
+                });
+            });
+        }).then(function (ret) {
+            proto = ret;
+            return sc.getRangeBytesByString.call("reward1", 0);
         }).then(function(ret) {
-            assert.equal(ret.toNumber(), 123, "id[0] should return 123");
-            return c.getF3.call(1);
-        }).then(function(ret) {
-            assert.equal(ret.toNumber(), 444, "f3[1] should return 444");
-            //then, load it with version2 schema (with convert)
+            /*console.log('bytes');
+            var hex = "0123456789ABCDEF";
+            for (var i = 0; i < ret[1]; i++) {
+                var code = ret[0][i];
+                var h = hex[(0xF0 & code) >> 4] + hex[0x0F & code];
+                console.log(h)
+            } */
+            var RewardsProto = proto.lookup("Rewards");
+            //this slice will not need after solidity 0.4.21 
+            //because dynamic length array can be used for return value of function afterward.
+            var rewards = RewardsProto.decode(ret[0].slice(0, ret[1]));
+            console.log(rewards);
+            assert.equal(rewards.id[0].isBigint() && rewards.id[1].isBigint(), true, "id array type should correct");
+            assert.equal(rewards.id[0].toBigint().toString(), "123", "id[0] should correct");
+            assert.equal(rewards.id[1].toBigint().toString(), "456", "id[1] should correct");
+            assert.equal(rewards.f1, 111, "f1 should correct");
+            assert.equal(rewards.f2[0].dueDate, 20180303, "f2[0].due_date should correct");
+            assert.equal(rewards.f2[0].progresses[0].step.isNumber() && rewards.f2[0].progresses[1].step.isNumber(), 
+                        true, "f2[0] progress type should correct");
+            assert.equal(rewards.f2[0].progresses[0].step.toNumber(), 1, "f2[0].progresses[0].step should correct");
+            assert.equal(rewards.f2[0].progresses[1].step.toNumber(), -111, "f2[0].progresses[1].step should correct");
+            assert.equal(rewards.f4.toBigint().toString(), "-3", "f4 should correct");
+
+        //then, load it with version2 schema (with convert)
             var c2;
             return Version2.deployed(Storage.address).then(function(instance) {
                 c2 = instance;
@@ -57,13 +104,9 @@ contract('Versions', function(accounts) {
             }).then(function () {
                 return c2.loadReward("reward1");
             }).then(function () {
-                return c2.getNewId.call();
+                return c2.check.call();
             }).then(function (ret) {
-                assert.equal(ret.toNumber(), 123, "new_id should return 123");
-                return c.getF3.call(1);
-            }).then(function(ret) {
-                assert.equal(ret.toNumber(), 444, "f3[1] should return 444");
-            }).then(function() {
+                assert.equal(ret.toNumber(), 0, "check fails with (" + ret.toNumber() + ")");
                 return c2.addReward("reward2");
             }).then(function () {
                 return c2.loadReward("reward2");

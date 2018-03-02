@@ -2,4 +2,5 @@
 proto/TaskList2.proto
 build
 contracts/libs/pb/*.sol
-TaskList_pb.sol
+node_modules
+package-lock.json

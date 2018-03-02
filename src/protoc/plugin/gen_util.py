@@ -214,7 +214,7 @@ def gen_struct_codec_lib_name_from_field(field):
     return prefix_lib_and_package(ftid)
 
 def gen_decoder_name(field):
-    val = Num2Type.get(field.type, None)
+    val = Num2PbType.get(field.type, None)
     if val != None:
         return "_pb._decode_" + val
     else:
@@ -224,7 +224,7 @@ def gen_decoder_name(field):
         return "_decode" + field.type_name.replace(".", "_")
 
 def gen_encoder_name(field):
-    val = Num2Type.get(field.type, None)
+    val = Num2PbType.get(field.type, None)
     if val != None:
         return "_pb._encode_" + val
     else:

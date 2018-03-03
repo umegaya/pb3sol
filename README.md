@@ -1,11 +1,14 @@
-#### pb3sol
+## pb3sol
 - protobuf3 solidity code generator, inpired by https://github.com/shmookey/solpb enhanced with:
   - [soltype-pb](https://www.npmjs.com/package/soltype-pb), which enhances inter-operability with [protobuf.js](https://github.com/dcodeIO/ProtoBuf.js/)
   - support native solidity types like address, uint256, by including special protobuf definition [Solidity.proto](https://github.com/umegaya/pb3sol/blob/master/src/protoc/include/Solidity.proto)
+- unimplemented protobuf feature
+  - enum. because solidity enum seems to not accept numerical value. 
+  - float/double. no floating type in solidity. 
 
 
 
-#### Motivation
+### Motivation
 - recently, some kind of dapp like game need to treat complex, unstable data structure. 
 - but for now, only solidity code can describe data structure and solidity code is immutable if it once deployed. 
 - thus migrate data schema in smart contract world often with full database copy. its *un-acceptable* from the view point of performance and cost. 
@@ -13,13 +16,24 @@
 
 
 
-#### Unimplemented protobuf feature
-- enum. because solidity enum seems to not accept numerical value. 
-- float/double. no floating type in solidity. 
+### Try it out
+- try to run test first. 
+- easiest way to run test is using docker. clone this repository and run ```make tsh``` then ```cd test && make test_setup test_on_host```
+- it does:
+  - launch docker container
+  - install necessary node module by using npm install
+  - compile proto files to solidity source
+  - run [truffle](http://truffleframework.com/) test
+    - [create storage contract](https://github.com/umegaya/pb3sol/blob/master/test/contracts/libs/Storage.sol) (contract which just holds byte array with string key)
+    - [store byte array encoded by protobuf](https://github.com/umegaya/pb3sol/blob/master/test/contracts/Version1.sol#L14)
+    - [load byte array and decoded by protobuf](https://github.com/umegaya/pb3sol/blob/master/test/contracts/Version1.sol#L48)
+    - [check encoded value is correctly restored](https://github.com/umegaya/pb3sol/blob/master/test/contracts/Version1.sol#L53)
+    - [load byte array and decode on js side](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L81)
+    - [decode it with new version of proto file and its correctly migreated](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L99)
 
 
 
-#### Caveat with solidity <= 0.4.20
+### Caveat with solidity <= 0.4.20
 - at the time I wrote this (2018/03/03), latest released solidity version is 0.4.20, which cannot allow us to:
   - return bytes from non-internal contract call
   - pass arbiter struct value to non-internal contract call
@@ -29,7 +43,7 @@
 
 
 
-#### Basic Usage
+### Basic Usage
 - simplest way is using docker. for example, under truffle project do like following.
 ```
 mkdir -p `pwd`/contracts/libs/pb 		# output directory for pb3sol
@@ -44,15 +58,12 @@ docker run --rm -ti -v `pwd`/contracts/libs/pb:/out -v `pwd`/proto:/in umegaya/p
 
 
 
-#### Handling native solidity type
+### Handling native solidity type
 - if you use docker image, built-in proto file "[Solidity.proto](https://github.com/umegaya/pb3sol/blob/master/src/protoc/include/Solidity.proto)" can import straight forward like ```import "Solidity.proto"```. then you can use ```.solidity.$typename``` to declare variable which directly convert to $typename variable in solidity codes. 
   - if you don't want to use docker, copy above file into somewhere in your proto compiler $path. 
 
 - basically these solidity type is bytes variable boxed with message. but convert these bytes into correct number or bigint, is not trivial work. 
   - we create node module [soltype-pb](https://www.npmjs.com/package/soltype-pb) to add small support for handling these native solidity types with protobufjs.
+  - installation to your project: ```npm install soltype-pb```
   - see [here](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L65) for usage.
-
-
-
-
 

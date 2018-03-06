@@ -2,16 +2,8 @@ var Version1 = artifacts.require('Version1');
 var Version2 = artifacts.require('Version2');
 var Storage = artifacts.require('Storage');
 
-var protobuf = require("protobufjs");
 var soltype = require(__dirname + "/../../src/soltype-pb");
-
-var origResolvePath = protobuf.Root.prototype.resolvePath;
-protobuf.Root.prototype.resolvePath = function (filename, path) {
-    if (path.endsWith("Solidity.proto")) {
-        return origResolvePath(filename, __dirname + "/../../src/protoc/include/Solidity.proto");
-    }
-    return origResolvePath(filename, path);
-}
+var protobuf = soltype.importProtoFile(require("protobufjs"));
 
 contract('Storage', function(accounts) {
     it("can deploy Storage contract", function() {
@@ -62,7 +54,7 @@ contract('Versions', function(accounts) {
                 protobuf.load("proto/TaskList.proto", function(err, proto) {
                     if (err) { reject(err); }
                     else { 
-                        soltype(proto); //add solidity type definition
+                        soltype.importTypes(proto); //add solidity type definition
                         resolve(proto); 
                     }
                 });

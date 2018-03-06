@@ -65,17 +65,29 @@ function Soliditize(proto, typename) {
     Object.assign(SolidityType.prototype, SolidityPrototypeExtension);
     proto.ctor = SolidityType;
 }
-module.exports = function (proto) {
-    Soliditize(proto.lookup("solidity.address"), "address");
-    [8, 16].forEach(function (v) {
-        Soliditize(proto.lookup("solidity.uint" + v.toString()), "uint");
-        Soliditize(proto.lookup("solidity.int" + v.toString()), "int");
-    });
-    ["", 128, 256].forEach(function (v) {
-        Soliditize(proto.lookup("solidity.uint" + v.toString()), "biguint");
-        Soliditize(proto.lookup("solidity.int" + v.toString()), "bigint");
-    });
-    for (var i = 1; i <= 32; i++) {
-        Soliditize(proto.lookup("solidity.bytes" + i), "bytes");
-    }//*/
+module.exports = {
+    importTypes: function (proto) {
+        Soliditize(proto.lookup("solidity.address"), "address");
+        [8, 16].forEach(function (v) {
+            Soliditize(proto.lookup("solidity.uint" + v.toString()), "uint");
+            Soliditize(proto.lookup("solidity.int" + v.toString()), "int");
+        });
+        ["", 128, 256].forEach(function (v) {
+            Soliditize(proto.lookup("solidity.uint" + v.toString()), "biguint");
+            Soliditize(proto.lookup("solidity.int" + v.toString()), "bigint");
+        });
+        for (var i = 1; i <= 32; i++) {
+            Soliditize(proto.lookup("solidity.bytes" + i), "bytes");
+        }//*/
+    },
+    importProtoFile: function (protobufjs) {
+        var origResolvePath = protobufjs.Root.prototype.resolvePath;
+        protobufjs.Root.prototype.resolvePath = function (filename, path) {
+            if (path.endsWith("Solidity.proto")) {
+                return origResolvePath(filename, __dirname + "/include/Solidity.proto");
+            }
+            return origResolvePath(filename, path);
+        }
+        return protobufjs;
+    },
 }

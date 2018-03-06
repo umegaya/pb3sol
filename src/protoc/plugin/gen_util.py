@@ -167,12 +167,15 @@ def field_sol_type(f):
 def prefix_lib_and_package(name):
     return PB_LIB_NAME_PREFIX + PB_CURRENT_PACKAGE + "_" + name
 
+def prefix_lib(name):
+    return PB_LIB_NAME_PREFIX + "_" + name
+
 def gen_delegate_lib_name(msg, parent_struct_name):
     return prefix_lib_and_package(add_prefix(parent_struct_name, msg.name))
 
 def gen_global_type_name_from_field(field):
     ftid, is_usertype = gen_field_type_id(field)
-    return prefix_lib_and_package(ftid) + ".Data" if is_usertype else ftid
+    return prefix_lib(ftid) + ".Data" if is_usertype else ftid
 
 def gen_global_type_from_field(field):
     t = gen_global_type_name_from_field(field)
@@ -186,6 +189,14 @@ def gen_global_type_from_field(field):
 
 def gen_internal_struct_name(msg, parent_struct_name):
     return "Data"
+
+def max_field_number(msg):
+    num = 0
+    for f in msg.field:
+        if num < f.number:
+            num = f.number
+    return num
+
 
 def gen_field_type_id(field):
     val = Num2Type.get(field.type, None)
@@ -211,7 +222,7 @@ def gen_struct_codec_lib_name_from_field(field):
     ftid, is_usertype = gen_field_type_id(field)
     if not is_usertype:
         "___{} is not user type ({})___".format(field.name, ftid)
-    return prefix_lib_and_package(ftid)
+    return prefix_lib(ftid)
 
 def gen_decoder_name(field):
     val = Num2PbType.get(field.type, None)

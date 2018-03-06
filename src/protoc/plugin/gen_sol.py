@@ -192,7 +192,7 @@ if __name__ == '__main__':
     request = plugin.CodeGeneratorRequest()
     request.ParseFromString(data)
 
-    #pp.pprint(request)
+    # pp.pprint(request)
 
     # Create response
     response = plugin.CodeGeneratorResponse()

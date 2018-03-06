@@ -86,7 +86,7 @@ def gen_inner_decoder(msg, parent_struct_name):
         "  }}                                                            \n"
     ).format(
         struct=util.gen_internal_struct_name(msg, parent_struct_name),
-        n=len(msg.field) + 1,
+        n=util.max_field_number(msg) + 1,
         first_pass=gen_inner_fields_decoder(msg, parent_struct_name, True),
         allocators=gen_inner_arraty_allocators(msg, parent_struct_name),
         second_pass=gen_inner_fields_decoder(msg, parent_struct_name, False),
@@ -111,7 +111,7 @@ def gen_field_reader(f, parent_struct_name, msg):
         decoder = util.gen_decoder_name(f),
         t = util.gen_internal_struct_name(msg, parent_struct_name),
         i = f.number,
-        n = len(msg.field) + 1,
+        n = util.max_field_number(msg) + 1,
         suffix = suffix,
     )
 

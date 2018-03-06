@@ -13,3 +13,6 @@ test_on_host:
 
 test_image:
 	make -C test image
+
+npm:
+	cd src/soltype-pb && npm run replace-link  && npm publish && npm run recover-link

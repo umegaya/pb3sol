@@ -3,7 +3,7 @@ var Version2 = artifacts.require('Version2');
 var Storage = artifacts.require('Storage');
 
 var soltype = require(__dirname + "/../../src/soltype-pb");
-var protobuf = soltype.importProtoFile(require("protobufjs"));
+var protobuf = soltype.importProtoFile(require("protobufjs")); //import Solidity.proto to default path
 
 contract('Storage', function(accounts) {
     it("can deploy Storage contract", function() {

@@ -12,7 +12,7 @@
 - recently, some kind of dapp like game need to treat complex, unstable data structure. 
 - but for now, only solidity code can describe data structure and solidity code is immutable if it once deployed. 
 - thus migrate data schema in smart contract world often with full database copy. its *un-acceptable* from the view point of performance and cost. 
-- storing data as bytes and parse with protobuf could solve this problem with small increase of each contract call gas consumption. 
+- storing data as bytes and parse with protobuf could solve this problem with small increase of each contract call gas consumption, by separating actual data storage and its schema definition (replacable as solidity library)
 
 
 
@@ -28,7 +28,7 @@
     - [store byte array encoded by protobuf](https://github.com/umegaya/pb3sol/blob/master/test/contracts/Version1.sol#L14)
     - [load byte array and decoded by protobuf](https://github.com/umegaya/pb3sol/blob/master/test/contracts/Version1.sol#L48)
     - [check encoded value is correctly restored](https://github.com/umegaya/pb3sol/blob/master/test/contracts/Version1.sol#L53)
-    - [load byte array and decode on js side](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L81)
+    - [load byte array and decode on js side](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L76)
     - [decode it with new version of proto file and its correctly migreated](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L99)
 
 
@@ -65,5 +65,5 @@ docker run --rm -ti -v `pwd`/contracts/libs/pb:/out -v `pwd`/proto:/in umegaya/p
 - basically these solidity type is bytes variable boxed with message. but convert these bytes into correct number or bigint, is not trivial work. 
   - we create node module [soltype-pb](https://www.npmjs.com/package/soltype-pb) to add small support for handling these native solidity types with protobufjs.
   - installation to your project: ```npm install soltype-pb```
-  - see [here](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L65) for usage.
+  - see [here](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L57) and [here](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L6) for usage.
 

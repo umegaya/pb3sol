@@ -72,7 +72,7 @@ module.exports = {
             Soliditize(proto.lookup("solidity.uint" + v.toString()), "uint");
             Soliditize(proto.lookup("solidity.int" + v.toString()), "int");
         });
-        ["", 128, 256].forEach(function (v) {
+        [128, 256].forEach(function (v) {
             Soliditize(proto.lookup("solidity.uint" + v.toString()), "biguint");
             Soliditize(proto.lookup("solidity.int" + v.toString()), "bigint");
         });

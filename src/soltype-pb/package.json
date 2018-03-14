@@ -1,6 +1,6 @@
 {
   "name": "soltype-pb",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "helper for handling solidity native type with protobufjs",
   "main": "index.js",
   "scripts": {

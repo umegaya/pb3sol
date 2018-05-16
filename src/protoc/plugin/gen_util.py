@@ -197,6 +197,11 @@ def max_field_number(msg):
             num = f.number
     return num
 
+def str_contains(s, token):
+    try:
+        return s.index(token) >= 0
+    except Exception as e:
+        return False
 
 def gen_field_type_id(field):
     val = Num2Type.get(field.type, None)

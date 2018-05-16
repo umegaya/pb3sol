@@ -270,7 +270,7 @@ library _pb {
     return sz;
   }
 
-  function _encode_zigzag(int i) internal returns (uint) {
+  function _encode_zigzag(int i) internal pure returns (uint) {
     if(i >= 0) return uint(i) * 2;
     else return uint(i * -2) - 1;
   }
@@ -281,7 +281,7 @@ library _pb {
     return i + _sz_varint(i);
   }
 
-  function _sz_key(uint i) internal constant returns (uint) {
+  function _sz_key(uint i) internal pure returns (uint) {
     if(i < 16) return 1;
     else if(i < 2048) return 2;
     else if(i < 262144) return 3;
@@ -768,27 +768,27 @@ library _pb {
     }
     return sz;
   }
-  function _twos_complement_256(int256 x) internal constant returns (uint256) {
+  function _twos_complement_256(int256 x) internal pure returns (uint256) {
     uint256 r; assembly { r := x }
     return r;
   }
-  function _twos_complement_128(int128 x) internal constant returns (uint128) {
+  function _twos_complement_128(int128 x) internal pure returns (uint128) {
     uint128 r; assembly { r := x }
     return r;
   }
-  function _twos_complement_64(int64 x) internal constant returns (uint64) {
+  function _twos_complement_64(int64 x) internal pure returns (uint64) {
     uint64 r; assembly { r := x }
     return r;
   }
-  function _twos_complement_32(int32 x) internal constant returns (uint32) {
+  function _twos_complement_32(int32 x) internal pure returns (uint32) {
     uint32 r; assembly { r := x }
     return r;
   }
-  function _twos_complement_16(int16 x) internal constant returns (uint16) {
+  function _twos_complement_16(int16 x) internal pure returns (uint16) {
     uint16 r; assembly { r := x }
     return r;
   }
-  function _twos_complement_8(int8 x) internal constant returns (uint8) {
+  function _twos_complement_8(int8 x) internal pure returns (uint8) {
     uint8 r; assembly { r := x }
     return r;
   }

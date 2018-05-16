@@ -31,10 +31,10 @@ def gen_struct_definition(msg, parent_struct_name):
 def gen_utility_functions(msg, parent_struct_name):
     return (
         "  //utility functions                                           \n"
-        "  function nil() internal constant returns ({name} r) {{        \n"
+        "  function nil() internal pure returns ({name} r) {{        \n"
         "    assembly {{ r := 0 }}                                       \n"
         "  }}                                                            \n"
-        "  function isNil({name} x) internal constant returns (bool r) {{\n"
+        "  function isNil({name} x) internal pure returns (bool r) {{\n"
         "    assembly {{ r := iszero(x) }}                               \n"
         "  }}                                                            \n"
     ).format(

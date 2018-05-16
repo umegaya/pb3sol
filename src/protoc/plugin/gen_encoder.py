@@ -14,6 +14,12 @@ def gen_main_encoder(msg, parent_struct_name):
 		struct = util.gen_internal_struct_name(msg, parent_struct_name),
 	)
 
+def has_repeated_field(fields):
+	for f in fields:
+		if util.field_is_repeated(f):
+			return True
+	return False
+
 def gen_inner_field_encoder(f):
 	#sys.stderr.write("fname={}, type={}\n".format(f.name, f.type))
 	return ((
@@ -39,12 +45,13 @@ def gen_inner_encoder(msg, parent_struct_name):
 		"  function _encode({struct} r, uint p, bytes bs)        \n"
 		"      internal constant returns (uint) {{               \n"
 		"    uint offset = p;                                   \n"
-		"    uint i;                                            \n"
+		"{counter}\n"
 		"{encoders}\n"
 		"    return p - offset;                                 \n"
 		"  }}                                                    \n"
 	).format(
 		struct = util.gen_internal_struct_name(msg, parent_struct_name),
+		counter = "uint i;" if has_repeated_field(msg.field) else "",
 		encoders = gen_inner_field_encoders(msg, parent_struct_name),
 	)
 
@@ -115,16 +122,21 @@ def gen_field_estimators(msg, parent_struct_name):
 	return ''.join(list(map((lambda f: gen_field_estimator(f)), msg.field)))
 
 def gen_estimator(msg, parent_struct_name):
+	est = gen_field_estimators(msg, parent_struct_name)
+	not_pure = util.str_contains(est, "r.")
 	return (
-		"  function _estimate({struct} r) internal constant returns (uint) {{ \n"
+		"  function _estimate({struct} {varname}) internal {mutability} returns (uint) {{ \n"
 		"    uint e;                                                        \n"
-		"    uint i;                                                        \n"
+		"{counter}\n"
 		"{estimators}\n"
 		"    return e;                                                      \n"
 		"  }}                                                                \n"
 	).format(
 		struct = util.gen_internal_struct_name(msg, parent_struct_name),
-		estimators = gen_field_estimators(msg, parent_struct_name),
+		varname = "r" if not_pure else "/* r */",
+		mutability = "constant" if not_pure else "pure",
+		counter = "uint i;" if has_repeated_field(msg.field) else "",
+		estimators = est,
 	)
 
 def gen_encoder_section(msg, parent_struct_name):

@@ -126,7 +126,10 @@ def apply_options(params_string):
     if "pb_libname" in params:
         util.change_pb_libname_prefix(params["pb_libname"])
     if "for_linking" in params:
-        util.set_lib_linking_mode()
+        sys.stderr.write("for_linking is still under experiment due to slow-pace of solidity development")
+        util.set_library_linking_mode()
+    if "gen_internal_lib" in params:
+        util.set_internal_linking_mode()
 
 def generate_code(request, response):
     generated = 0
@@ -146,6 +149,8 @@ def generate_code(request, response):
         # generate sol library
         # prologue
         output.append('pragma solidity ^{0};'.format(util.SOLIDITY_VERSION))
+        for pragma in util.SOLIDITY_PRAGMAS:
+            output.append('{0};'.format(pragma))
         output.append('import "./{0}";'.format(RUNTIME_FILE_NAME))
         for dep in proto_file.dependency:
             if SOLIDITY_NATIVE_TYPEDEFS in dep:

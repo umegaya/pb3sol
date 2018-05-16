@@ -127,6 +127,7 @@ PB_LIB_NAME_PREFIX = "pb"
 PB_CURRENT_PACKAGE = ""
 LIBRARY_LINKING_MODE = False
 SOLIDITY_VERSION = "0.4.0"
+SOLIDITY_PRAGMAS = []
 
 # utils
 def add_prefix(prefix, name, sep = "_"):
@@ -271,14 +272,23 @@ def is_lib_linking_mode():
     global LIBRARY_LINKING_MODE
     return LIBRARY_LINKING_MODE
 
-def set_lib_linking_mode():
+def set_library_linking_mode():
     global LIBRARY_LINKING_MODE
-    # disable for now because cannot return arbiter struct and 
-    # dynamic length bytes array until solidity 0.4.21
-    # LIBRARY_LINKING_MODE = True
+    LIBRARY_LINKING_MODE = True
+    global SOLIDITY_VERSION
+    SOLIDITY_VERSION = "0.4.23"
+    global SOLIDITY_PRAGMAS
+    SOLIDITY_PRAGMAS = ["pragma experimental ABIEncoderV2"]
+
+def set_internal_linking_mode():
+    global LIBRARY_LINKING_MODE
     LIBRARY_LINKING_MODE = False
+    global SOLIDITY_VERSION
+    SOLIDITY_VERSION = "0.4.0"
+    global SOLIDITY_PRAGMAS
+    SOLIDITY_PRAGMAS = []
 
 def gen_visibility(is_decoder):
     if not LIBRARY_LINKING_MODE:
         return "internal"
-    return "internal" if is_decoder else ""
+    return "public" #"internal" if is_decoder else ""

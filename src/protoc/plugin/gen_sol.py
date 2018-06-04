@@ -126,7 +126,7 @@ def apply_options(params_string):
     if "pb_libname" in params:
         util.change_pb_libname_prefix(params["pb_libname"])
     if "for_linking" in params:
-        sys.stderr.write("for_linking is still under experiment due to slow-pace of solidity development")
+        sys.stderr.write("for_linking is still under experiment due to slow-pace of solidity development\n")
         util.set_library_linking_mode()
     if "gen_internal_lib" in params:
         util.set_internal_linking_mode()

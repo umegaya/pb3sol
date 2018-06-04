@@ -5,7 +5,7 @@ contract Restrictable {
     address public administrator;
     mapping (address => Privilege) public members;
 
-    function Restrictable() public {
+    constructor() public {
         administrator = msg.sender;
     }
 

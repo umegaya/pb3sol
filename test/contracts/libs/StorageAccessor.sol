@@ -7,7 +7,7 @@ contract StorageAccessor is Restrictable {
     uint internal constant LOAD_CHUNK_SIZE = 256; //should match with Storage.LOAD_CHUNK_SIZE
     Storage public storageContract; //Storage contract
 
-    function StorageAccessor(address storageAddress) Restrictable() public {
+    constructor(address storageAddress) Restrictable() public {
         storageContract = Storage(storageAddress);
     }
 
@@ -21,7 +21,7 @@ contract StorageAccessor is Restrictable {
         uint offset = 0;
         bytes memory ret = new bytes(length);
         for (;length > offset; offset += LOAD_CHUNK_SIZE) {
-            var (chunk, clen) = storageContract.getRangeBytesByString(key, offset);
+            (byte[256] memory chunk, uint clen) = storageContract.getRangeBytesByString(key, offset);
             for (uint i = 0; i < clen; i++) {
                 ret[offset + i] = chunk[i];
             }

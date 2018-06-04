@@ -6,7 +6,7 @@ contract Storage is Restrictable {
     uint public constant LOAD_CHUNK_SIZE = 256;
     mapping (string => bytes) stringMap;
 
-    function Storage() Restrictable() public {
+    constructor() Restrictable() public {
     }
 
     function getBytesByString(string key) public view reader returns (bytes) {

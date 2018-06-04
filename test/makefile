@@ -10,11 +10,11 @@ endef
 
 .PHONY: proto
 proto:
-	$(call soliditize,${INPUT_DIR}/TaskList.proto,gen_runtime=True:${OUTPUT_DIR})
+	$(call soliditize,${INPUT_DIR}/TaskList.proto,"gen_runtime=True:${OUTPUT_DIR}")
 
 test_proto: proto
 	sed -e 's/.solidity.int128 f4 = 5;/.solidity.int128 f4 = 5;.solidity.uint256 new_id = 6;/g' proto/TaskList.proto > proto/TaskList2.proto
-	$(call soliditize,${INPUT_DIR}/TaskList2.proto,pb_libname=pb2:${OUTPUT_DIR})
+	$(call soliditize,${INPUT_DIR}/TaskList2.proto,"pb_libname=pb2:${OUTPUT_DIR}")
 
 shell:
 	docker run --rm -ti -v `pwd`/contracts/libs/pb:${OUTPUT_DIR} -v `pwd`/proto:${INPUT_DIR} -v `pwd`/../src/protoc:/protoc ${CONTAINER} bash

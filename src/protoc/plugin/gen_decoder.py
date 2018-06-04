@@ -3,11 +3,11 @@ import gen_util as util
 def gen_main_decoder(msg, parent_struct_name):
     return (
         "  function decode(bytes bs) {visibility} constant returns ({name}) {{\n"
-        "    var (x,) = _decode(32, bs, bs.length);                       \n"
+        "    (Data memory x,) = _decode(32, bs, bs.length);                       \n"
         "    return x;                                                    \n"
         "  }}\n"
-        "  function decode({name} storage self, bytes bs) {visibility} constant {{\n"
-        "    var (x,) = _decode(32, bs, bs.length);                    \n"
+        "  function decode({name} storage self, bytes bs) {visibility} {{\n"
+        "    (Data memory x,) = _decode(32, bs, bs.length);                    \n"
         "    store(x, self);                                           \n"
         "  }}"
     ).format(
@@ -97,18 +97,19 @@ def gen_field_reader(f, parent_struct_name, msg):
     suffix = ("[ r.{field}.length - counters[{i}] ]").format(field = f.name, i = f.number) if util.field_is_repeated(f) else ""
     return (
         "  function _read_{field}(uint p, bytes bs, {t} r, uint[{n}] counters) internal constant returns (uint) {{                            \n"
-        "    var (x, sz) = {decoder}(p, bs);                                  \n"
+        "    ({decode_type} x, uint sz) = {decoder}(p, bs);                   \n"
         "    if(isNil(r)) {{                                                  \n" 
         "      counters[{i}] += 1;                                            \n"
-        "    }} else {{                                                         \n"
+        "    }} else {{                                                       \n"
         "      r.{field}{suffix} = x;                                         \n"
         "      if(counters[{i}] > 0) counters[{i}] -= 1;                      \n"
-        "    }}                                                                \n"
+        "    }}                                                               \n"
         "    return sz;                                                       \n"
         "  }}                                                                 \n"
     ).format(
         field = f.name,
         decoder = util.gen_decoder_name(f),
+        decode_type = util.gen_global_type_decl_from_field(f),
         t = util.gen_internal_struct_name(msg, parent_struct_name),
         i = f.number,
         n = util.max_field_number(msg) + 1,
@@ -123,13 +124,14 @@ def gen_struct_decoder(f, msg, parent_struct_name):
     return (
         "  function {name}(uint p, bytes bs)            \n"
         "      internal constant returns ({struct}, uint) {{    \n"
-        "    var (sz, bytesRead) = _pb._decode_varint(p, bs);   \n"
+        "    (uint sz, uint bytesRead) = _pb._decode_varint(p, bs);   \n"
         "    p += bytesRead;                                    \n"
-        "    var (r,) = {lib}._decode(p, bs, sz);               \n"
+        "    ({decode_type} r,) = {lib}._decode(p, bs, sz);               \n"
         "    return (r, sz + bytesRead);                        \n"
         "  }}      \n"
     ).format(
         struct = util.gen_global_type_name_from_field(f),
+        decode_type = util.gen_global_type_decl_from_field(f),
         name = util.gen_struct_decoder_name_from_field(f),
         lib = util.gen_struct_codec_lib_name_from_field(f)
     )

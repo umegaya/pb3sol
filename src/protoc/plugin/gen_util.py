@@ -152,6 +152,17 @@ def field_is_message(f):
 def field_is_repeated(f):
     return f.label == Label2Value["LABEL_REPEATED"]
 
+def field_has_dyn_size(f):
+    # if string or bytes, dynamic
+    if f.type == 9 or f.type == 12:
+        return True
+    elif f.type == TYPE_MESSAGE:
+        # if non struct, message should be translate struct, which may have dynamic size
+        # otherwise solidity native type, which should not have dynamic size
+        return field_sol_type(f) == None
+    else:
+        return False
+
 def field_pb_type(f):
     if f.type == TYPE_MESSAGE:
         return "message"
@@ -177,6 +188,13 @@ def gen_delegate_lib_name(msg, parent_struct_name):
 def gen_global_type_name_from_field(field):
     ftid, is_usertype = gen_field_type_id(field)
     return prefix_lib(ftid) + ".Data" if is_usertype else ftid
+
+def gen_global_type_decl_from_field(field):
+    tp = gen_global_type_name_from_field(field)
+    if field_has_dyn_size(field):
+        return tp + " memory"
+    else:
+        return tp
 
 def gen_global_type_from_field(field):
     t = gen_global_type_name_from_field(field)
@@ -238,7 +256,7 @@ def gen_decoder_name(field):
         val = field_sol_type(field)
         if val != None:
             return "_pb._decode_sol_" + val
-        return "_decode" + field.type_name.replace(".", "_")
+        return "_decode" + field.type_name.replace(".", "_")            
 
 def gen_encoder_name(field):
     val = Num2PbType.get(field.type, None)

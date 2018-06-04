@@ -8,7 +8,7 @@ contract Version1 is StorageAccessor {
     using pb_Rewards for pb_Rewards.Data;
     pb_Rewards.Data public tmp;
     
-	function Version1(address storageAddress) StorageAccessor(storageAddress) public {
+	constructor(address storageAddress) StorageAccessor(storageAddress) public {
     }
 
     function addReward(string key) public writer returns (uint256) {

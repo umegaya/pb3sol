@@ -64,7 +64,7 @@ library _pb {
       uint x = 0;
       uint sz = 0;
       assembly {
-        let b := 0
+        let b := 0x80
         p     := add(bs, p)
         for {} eq(0x80, and(b, 0x80)) {} {
           b  := byte(0, mload(p))
@@ -166,19 +166,17 @@ library _pb {
       end:
 
 */
-      for {
-        let byt := and(x, 0x7f)
-        let pbyt := and(div(x, exp(2, 7)), 0x7f)
-      } not(eq(pbyt, 0)) {
-        mstore8(bsptr, byt)
-        sz := add(sz, 1)
-      } {
+      let byt := and(x, 0x7f)
+      let pbyt := and(div(x, exp(2, 7)), 0x7f)
+      for {} eq(eq(pbyt, 0), 0) {} {
         mstore8(bsptr, or(0x80, byt))
         bsptr := add(bsptr, 1)
         sz := add(sz, 1)
         byt := and(div(x, exp(2, mul(7, sz))), 0x7f)
         pbyt := and(div(x, exp(2, mul(7, add(sz, 1)))), 0x7f)
       }
+      mstore8(bsptr, byt)
+      sz := add(sz, 1)
     }
     return sz;
   }
@@ -296,7 +294,7 @@ library _pb {
   function _sz_varint(uint i) internal pure returns (uint) {
     uint count = 1;
     assembly {
-      for {} lt(i, exp(2, mul(7, count))) {} {
+      for {} eq(lt(i, exp(2, mul(7, count))), 0) {} {
         count := add(count, 1)
       }
     }

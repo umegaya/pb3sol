@@ -2,7 +2,7 @@ import gen_util as util
 
 def gen_main_decoder(msg, parent_struct_name):
     return (
-        "  function decode(bytes bs) {visibility} constant returns ({name}) {{\n"
+        "  function decode(bytes bs) {visibility} pure returns ({name}) {{\n"
         "    (Data memory x,) = _decode(32, bs, bs.length);                       \n"
         "    return x;                                                    \n"
         "  }}\n"
@@ -63,7 +63,7 @@ def gen_inner_arraty_allocators(msg, parent_struct_name):
 def gen_inner_decoder(msg, parent_struct_name):
     return (
         "  function _decode(uint p, bytes bs, uint sz)                   \n"
-        "      internal constant returns ({struct}, uint) {{             \n"
+        "      internal pure returns ({struct}, uint) {{             \n"
         "    {struct} memory r;                                          \n"
         "    uint[{n}] memory counters;                                  \n"
         "    uint fieldId;                                               \n"
@@ -96,7 +96,7 @@ def gen_inner_decoder(msg, parent_struct_name):
 def gen_field_reader(f, parent_struct_name, msg):
     suffix = ("[ r.{field}.length - counters[{i}] ]").format(field = f.name, i = f.number) if util.field_is_repeated(f) else ""
     return (
-        "  function _read_{field}(uint p, bytes bs, {t} r, uint[{n}] counters) internal constant returns (uint) {{                            \n"
+        "  function _read_{field}(uint p, bytes bs, {t} r, uint[{n}] counters) internal pure returns (uint) {{                            \n"
         "    ({decode_type} x, uint sz) = {decoder}(p, bs);                   \n"
         "    if(isNil(r)) {{                                                  \n" 
         "      counters[{i}] += 1;                                            \n"
@@ -123,7 +123,7 @@ def gen_field_readers(msg, parent_struct_name):
 def gen_struct_decoder(f, msg, parent_struct_name):
     return (
         "  function {name}(uint p, bytes bs)            \n"
-        "      internal constant returns ({struct}, uint) {{    \n"
+        "      internal pure returns ({struct}, uint) {{    \n"
         "    (uint sz, uint bytesRead) = _pb._decode_varint(p, bs);   \n"
         "    p += bytesRead;                                    \n"
         "    ({decode_type} r,) = {lib}._decode(p, bs, sz);               \n"

@@ -3,7 +3,7 @@ import gen_util as util
 
 def gen_main_encoder(msg, parent_struct_name):
 	return (
-		"  function encode({struct} r) {visibility} constant returns (bytes) {{\n"
+		"  function encode({struct} r) {visibility} pure returns (bytes) {{\n"
 		"    bytes memory bs = new bytes(_estimate(r));					   \n"
 		"    uint sz = _encode(r, 32, bs);                                 \n"
 		"    assembly {{ mstore(bs, sz) }}                                 \n"
@@ -43,7 +43,7 @@ def gen_inner_field_encoders(msg, parent_struct_name):
 def gen_inner_encoder(msg, parent_struct_name):
 	return (
 		"  function _encode({struct} r, uint p, bytes bs)        \n"
-		"      internal constant returns (uint) {{               \n"
+		"      internal pure returns (uint) {{               \n"
 		"    uint offset = p;                                   \n"
 		"{counter}\n"
 		"{encoders}\n"
@@ -58,7 +58,7 @@ def gen_inner_encoder(msg, parent_struct_name):
 def gen_nested_encoder(msg, parent_struct_name):
 	return (
 		"  function _encode_nested({struct} r, uint p, bytes bs)        \n"
-		"      internal constant returns (uint) {{                       \n"
+		"      internal pure returns (uint) {{                       \n"
 		"    uint offset = p;                                           \n"
 		"    p += _pb._encode_varint(_estimate(r), p, bs);              \n"
 		"    p += _encode(r, p, bs);                                    \n"
@@ -134,7 +134,7 @@ def gen_estimator(msg, parent_struct_name):
 	).format(
 		struct = util.gen_internal_struct_name(msg, parent_struct_name),
 		varname = "r" if not_pure else "/* r */",
-		mutability = "constant" if not_pure else "pure",
+		mutability = "pure",
 		counter = "uint i;" if has_repeated_field(msg.field) else "",
 		estimators = est,
 	)

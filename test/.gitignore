@@ -3,4 +3,5 @@ proto/TaskList2.proto
 build
 contracts/libs/pb/*.sol
 node_modules
+*.pid
 package-lock.json

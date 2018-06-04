@@ -20,8 +20,9 @@ shell:
 	docker run --rm -ti -v `pwd`/contracts/libs/pb:${OUTPUT_DIR} -v `pwd`/proto:${INPUT_DIR} -v `pwd`/../src/protoc:/protoc ${CONTAINER} bash
 
 run: test_proto
-	truffle develop --log &
+	bash ./tools/run_chain.sh
 	truffle test
+	kill `cat ./test_chain.pid`
 
 image:
 	cd tools/container && docker build -t umegaya/pb3sol_test .

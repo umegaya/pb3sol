@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.24;
 
 import "./Restrictable.sol";
 import "./Storage.sol";
@@ -17,16 +17,7 @@ contract StorageAccessor is Restrictable {
     //after ABIEncoderV2 gets default, 
     //these codes will become just proxy for Storage(storageContract).getBytes(key)
     function loadBytesByString(string key) internal view reader returns (bytes) {
-        uint length = storageContract.getBytesLengthByString(key);
-        uint offset = 0;
-        bytes memory ret = new bytes(length);
-        for (;length > offset; offset += LOAD_CHUNK_SIZE) {
-            (byte[256] memory chunk, uint clen) = storageContract.getRangeBytesByString(key, offset);
-            for (uint i = 0; i < clen; i++) {
-                ret[offset + i] = chunk[i];
-            }
-        }
-        return ret; 
+        return Storage(storageContract).getBytesByString(key);
     }
 }
 //*/

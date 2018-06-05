@@ -1,5 +1,5 @@
 ## pb3sol
-- protobuf3 solidity code generator, inpired by https://github.com/shmookey/solpb enhanced with:
+- protobuf3 solidity code generator, inpired by https://github.com/shmookey/solpb (only supports pb2) enhanced with:
   - [soltype-pb](https://www.npmjs.com/package/soltype-pb), which enhances inter-operability with [protobuf.js](https://github.com/dcodeIO/ProtoBuf.js/)
   - support native solidity types like address, uint256, by including special protobuf definition [Solidity.proto](https://github.com/umegaya/pb3sol/blob/master/src/protoc/include/Solidity.proto)
 - unimplemented protobuf feature
@@ -11,16 +11,18 @@
 ### Motivation
 - recently, some kind of dapp like game need to treat complex, unstable data structure. 
 - but for now, only solidity code can describe data structure and solidity code is immutable if it once deployed. 
-- thus migrate data schema in smart contract world often with full database copy. its *un-acceptable* from the view point of performance and cost. 
-- storing data as bytes and parse with protobuf could solve this problem with small increase of each contract call gas consumption, by separating actual data storage and its schema definition (replacable as solidity library)
+ - actually, code can be replaced by [zos](https://zeppelinos.org/) or similar technology, but data related with old contract cannot move to new one automatically
+- thus migrate data schema in smart contract is often with full database copy. its *un-acceptable* from the view point of performance and cost. 
+- storing data as bytes and parse with protobuf could solve this problem with small increase of gas comsumption for each contract call, by separating actual data storage and its schema definition (replacable as solidity library)
+- also, if we describe data as protobuf encoded byte array, contract only need to return byte array and parsing can be done on each client, which is huge save for contract code size and execution fee
 
 
 
 ### Try it out
 - try to run test first. 
-- easiest way to run test is using docker. clone this repository and run ```make tsh``` then ```cd test && make test_setup test_on_host```
+- easiest way to run test is using docker. clone this repository and run ```make tsh``` to enter shell, then ```cd test && make test_setup test_on_host```
 - it does:
-  - launch docker container
+  - launch docker container and enter shell
   - install necessary node module by using npm install
   - compile proto files to solidity source
   - run [truffle](http://truffleframework.com/) test
@@ -32,6 +34,11 @@
     - [decode it with new version of proto file and its correctly migreated](https://github.com/umegaya/pb3sol/blob/master/test/test/v1_access.js#L99)
 
 
+
+### Caveat with solidity <= 0.4.24
+- at the time I wrote this (2018/03/03), latest released solidity version is 0.4.24, which cannot allow us to:
+  - pass/return arbiter struct value to/from non-internal contract call
+- so still we cannot use generated library for linking. 
 
 ### Caveat with solidity <= 0.4.20
 - at the time I wrote this (2018/03/03), latest released solidity version is 0.4.20, which cannot allow us to:

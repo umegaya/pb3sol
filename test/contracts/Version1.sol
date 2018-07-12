@@ -27,7 +27,10 @@ contract Version1 is StorageAccessor {
         r.f2[0].due_date = 20180303;
         r.f2[0].progresses = new pb_TaskList_Task_Progress.Data[](2);
         r.f2[0].progresses[0].step = 1;
+        r.f2[0].progresses[0].prog_type = pb_TaskList.ProgressType_Start();
         r.f2[0].progresses[1].step = -111;
+        r.f2[0].progresses[1].prog_type = pb_TaskList.ProgressType_Done();
+        require(r.f2[0].progresses[1].prog_type == 34 && r.f2[0].progresses[0].prog_type == 12);
 
         r.f2[1].due_date = 20180401;
         r.f2[1].progresses = new pb_TaskList_Task_Progress.Data[](1);
@@ -50,6 +53,10 @@ contract Version1 is StorageAccessor {
         tmp.decode(b);
     }//*/
 
+    function getBytes() public returns (bytes) {
+        return tmp.encode();
+    }
+
     function check() public view reader returns (int) {
         if (tmp.id[0] != 123) { return -1; }
         if (tmp.id[1] != 456) { return -2; }
@@ -57,7 +64,9 @@ contract Version1 is StorageAccessor {
         if (tmp.f2[0].due_date != 20180303) { return -4; }
         if (tmp.f2[1].due_date != 20180401) { return -5; }
         if (tmp.f2[0].progresses[0].step != 1) { return -6; }
+        if (tmp.f2[0].progresses[0].prog_type != pb_TaskList.ProgressType_Start()) { return -100000 - tmp.f2[0].progresses[0].prog_type; }
         if (tmp.f2[0].progresses[1].step != -111) { return -7; }
+        if (tmp.f2[0].progresses[1].prog_type != pb_TaskList.ProgressType_Done()) { return -200000 - tmp.f2[0].progresses[1].prog_type; }
         if (tmp.f2[1].progresses[0].step != 3) { return -8; }
         if (tmp.f4 != -3) { return -9; }    
         return 0;

@@ -24,8 +24,12 @@ library _pb {
 
     function _decode_int64(uint p, bytes bs) internal pure returns (int64, uint) {
       (uint varint, uint sz) = _decode_varint(p, bs);
-      int32 r; assembly { r := varint }
+      int64 r; assembly { r := varint }
       return (r, sz);
+    }
+
+    function _decode_enum(uint p, bytes bs) internal pure returns (int64, uint) {
+      return _decode_int64(p, bs);
     }
 
     function _decode_sint32(uint p, bytes bs) internal pure returns (int32, uint) {
@@ -223,6 +227,10 @@ library _pb {
     return _encode_varint(twosComplement, p, bs);
   }
 
+  function _encode_enum(int64 x, uint p, bytes bs) internal pure returns (uint) {
+    return _encode_int64(x, p, bs);
+  }
+
   function _encode_sint32(int32 x, uint p, bytes bs) internal pure returns (uint) {
     return _encode_varints(x, p, bs);
   }
@@ -315,6 +323,11 @@ library _pb {
   }
 
   function _sz_int64(int64 i) internal pure returns (uint) {
+    if (i < 0) return 10;
+    else return _sz_varint(uint64(i));
+  }
+
+  function _sz_enum(int64 i) internal pure returns (uint) {
     if (i < 0) return 10;
     else return _sz_varint(uint64(i));
   }

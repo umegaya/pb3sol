@@ -4,10 +4,16 @@ syntax = "proto3";
 import "Solidity.proto";
 
 message TaskList {
+    enum ProgressType {
+        None = 0;
+        Start = 12;
+        Done = 34;
+    }
     message Task {
         uint64 due_date = 1;
         message Progress {
-            solidity.int16 step = 1;
+            .solidity.int16 step = 1;
+            ProgressType prog_type = 2;
         }
         repeated Progress progresses = 2;
     }

@@ -42,6 +42,8 @@ contract Version2 is StorageAccessor {
         if (tmp.f2[1].due_date != 20180401) { return -5; }
         if (tmp.f2[0].progresses[0].step != 1) { return -6; }
         if (tmp.f2[0].progresses[1].step != -111) { return -7; }
+        if (tmp.f2[0].progresses[0].prog_type != pb2_TaskList.ProgressType_Start()) { return -11; }
+        if (tmp.f2[0].progresses[1].prog_type != pb2_TaskList.ProgressType_Done()) { return -12; }
         if (tmp.f2[1].progresses[0].step != 3) { return -8; }
         if (tmp.f4 != -3) { return -9; }    
         if (tmp.new_id != 123) { return -10; }

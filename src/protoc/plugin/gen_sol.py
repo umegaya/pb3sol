@@ -158,7 +158,7 @@ def generate_code(request, response):
     
     for proto_file in request.proto_file:
         # skip google.protobuf namespace
-        if proto_file.package == "google.protobuf" and COMPILE_META_SCHEMA:
+        if (proto_file.package == "google.protobuf") and (not COMPILE_META_SCHEMA):
             continue
         # skip native solidity type definition
         if SOLIDITY_NATIVE_TYPEDEFS in proto_file.name:
@@ -177,6 +177,8 @@ def generate_code(request, response):
         output.append('import "./{0}";'.format(RUNTIME_FILE_NAME))
         for dep in proto_file.dependency:
             if SOLIDITY_NATIVE_TYPEDEFS in dep:
+                continue
+            if ("google/protobuf" in dep) and (not COMPILE_META_SCHEMA):
                 continue
             output.append('import "./{0}";'.format(dep.replace('.proto', '_pb.sol')))
 

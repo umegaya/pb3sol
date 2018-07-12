@@ -58,7 +58,7 @@ contract('Versions', function(accounts) {
                         resolve(proto); 
                     }
                 });
-            });
+            });//*/
         }).then(function (ret) {
             proto = ret;
             return sc.getRangeBytesByString.call("reward1", 0);
@@ -74,7 +74,7 @@ contract('Versions', function(accounts) {
             //this slice will not need after solidity 0.4.21 
             //because dynamic length array can be used for return value of function afterward.
             var rewards = RewardsProto.decode(ret[0].slice(0, ret[1]));
-            console.log(rewards);
+            //console.log(rewards.f2[0].progresses[0], rewards.f2[0].progresses[1]);
             assert.equal(rewards.id[0].isBigint() && rewards.id[1].isBigint(), true, "id array type should correct");
             assert.equal(rewards.id[0].toBigint().toString(), "123", "id[0] should correct");
             assert.equal(rewards.id[1].toBigint().toString(), "456", "id[1] should correct");
@@ -83,7 +83,9 @@ contract('Versions', function(accounts) {
             assert.equal(rewards.f2[0].progresses[0].step.isNumber() && rewards.f2[0].progresses[1].step.isNumber(), 
                         true, "f2[0] progress type should correct");
             assert.equal(rewards.f2[0].progresses[0].step.toNumber(), 1, "f2[0].progresses[0].step should correct");
+            assert.equal(rewards.f2[0].progresses[0].progType, 12, "f2[0].progresses[0].prog_type should correct");
             assert.equal(rewards.f2[0].progresses[1].step.toNumber(), -111, "f2[0].progresses[1].step should correct");
+            assert.equal(rewards.f2[0].progresses[1].progType, 34, "f2[0].progresses[1].prog_type should correct");
             assert.equal(rewards.f4.toBigint().toString(), "-3", "f4 should correct");
 
         //then, load it with version2 schema (with convert)

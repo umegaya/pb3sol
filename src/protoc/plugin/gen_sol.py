@@ -19,13 +19,24 @@ def gen_fields(msg):
 def gen_struct_definition(msg, parent_struct_name):
     return (
         "  //struct definition\n"
-        "  struct Data {{   \n"
+        "  struct Data {{     \n"
         "{fields}             \n" # TODO. add indent for 2nd+ field
         "  }}                 "
     ).format(
         fields=gen_fields(msg)
     )
 
+def gen_enums(msg):
+    return '\n'.join(list(map(util.gen_enumtype, msg.enum_type)))
+
+# below gen_* codes for generating internal library
+def gen_enum_definition(msg, parent_struct_name):
+    return (
+        "  //enum definition\n"
+        "  {enums}"
+    ).format(
+        enums=gen_enums(msg)
+    )
 
 # below gen_* codes for generating internal library
 def gen_utility_functions(msg, parent_struct_name):
@@ -91,6 +102,7 @@ def gen_codec(msg, main_codecs, delegate_codecs, parent_struct_name = None):
     # delegate codec
     delegate_codecs.append((
         "library {delegate_lib_name}{{\n"
+        "{enum_definition}            \n"
         "{struct_definition}          \n"
         "{decoder_section}            \n"
         "{encoder_section}            \n"
@@ -99,6 +111,7 @@ def gen_codec(msg, main_codecs, delegate_codecs, parent_struct_name = None):
         "}} //library {delegate_lib_name}\n"
     ).format(
         delegate_lib_name=delegate_lib_name, 
+        enum_definition=gen_enum_definition(msg, parent_struct_name),
         struct_definition=gen_struct_definition(msg, parent_struct_name),
         decoder_section=gen_decoder_section(msg, parent_struct_name),
         encoder_section=gen_encoder_section(msg, parent_struct_name),
@@ -130,6 +143,9 @@ def apply_options(params_string):
         util.set_library_linking_mode()
     if "gen_internal_lib" in params:
         util.set_internal_linking_mode()
+    if "use_builtin_enum" in params:
+        sys.stderr.write("warning: use_builtin_enum option is still under experiment because we cannot set value to solidity's enum\n")
+        util.set_enum_as_constant(True)
 
 def generate_code(request, response):
     generated = 0

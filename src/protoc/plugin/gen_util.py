@@ -122,10 +122,15 @@ SolType2BodyLen = {
     "bytes32": 32,
 }
 
+INTERNAL_TYPE_CATEGORY_BUILTIN = 1
+INTERNAL_TYPE_CATEGORY_ENUM = 2
+INTERNAL_TYPE_CATEGORY_USERTYPE = 3
+
 TYPE_MESSAGE = 11
 PB_LIB_NAME_PREFIX = "pb"
 PB_CURRENT_PACKAGE = ""
 LIBRARY_LINKING_MODE = False
+ENUM_AS_CONSTANT = True
 SOLIDITY_VERSION = "0.4.0"
 SOLIDITY_PRAGMAS = []
 
@@ -186,8 +191,14 @@ def gen_delegate_lib_name(msg, parent_struct_name):
     return prefix_lib_and_package(add_prefix(parent_struct_name, msg.name))
 
 def gen_global_type_name_from_field(field):
-    ftid, is_usertype = gen_field_type_id(field)
-    return prefix_lib(ftid) + ".Data" if is_usertype else ftid
+    ftid, type_category = gen_field_type_id(field)
+    if type_category == INTERNAL_TYPE_CATEGORY_BUILTIN:
+        return ftid
+    elif type_category == INTERNAL_TYPE_CATEGORY_ENUM:
+        global ENUM_AS_CONSTANT
+        return "int64" if ENUM_AS_CONSTANT else prefix_lib(ftid)
+    elif type_category == INTERNAL_TYPE_CATEGORY_USERTYPE:
+        return prefix_lib(ftid) + ".Data"
 
 def gen_global_type_decl_from_field(field):
     tp = gen_global_type_name_from_field(field)
@@ -222,14 +233,23 @@ def str_contains(s, token):
     except Exception as e:
         return False
 
+def gen_struct_name_from_field(f):
+    return f.type_name[1:].replace(".", "_")
+
+def gen_enum_name_from_field(f):
+    seps = f.type_name.split('.')
+    return ('_'.join(seps[1:-1])) + "." + seps[-1]
+
 def gen_field_type_id(field):
     val = Num2Type.get(field.type, None)
     if val != None:
-        return (val, False)
+        if val == "enum":
+            return (gen_enum_name_from_field(field), INTERNAL_TYPE_CATEGORY_ENUM)
+        return (val, INTERNAL_TYPE_CATEGORY_BUILTIN)
     val = field_sol_type(field)
     if val != None:
-        return (val, False)
-    return (field.type_name[1:].replace(".", "_"), True)
+        return (val, INTERNAL_TYPE_CATEGORY_BUILTIN)
+    return (gen_struct_name_from_field(field), INTERNAL_TYPE_CATEGORY_USERTYPE)
 
 def gen_fieldtype(field):
     t = gen_global_type_name_from_field(field)
@@ -238,13 +258,49 @@ def gen_fieldtype(field):
     else:
         return t
 
+def gen_enumvalue_entry(v):
+    return "{name} = {number},".format(
+        name = v.name,
+        number = v.number
+    )
+
+def gen_enumvalues(e):
+    return '\n    '.join(
+        list(map(gen_enumvalue_entry, e.value))
+    )
+
+def gen_enumtype(e):
+    global ENUM_AS_CONSTANT
+    if ENUM_AS_CONSTANT:
+        return '\n  '.join(
+            list(map(lambda v: 
+                (
+                    "int64 public constant _{type}_{name} = {value};\n"
+                    "  function {type}_{name}() internal pure returns (int64) {{ return _{type}_{name}; }}"
+                ).format(
+                    type = e.name,
+                    name = v.name,
+                    value = v.number,
+                ), 
+            e.value))
+        )
+    else:
+        return (
+            "enum {enum_name} {{\n"
+            "    {enum_values}\n"
+            "  }}"
+        ).format(
+            enum_name = e.name,
+            enum_values = gen_enumvalues(e),
+        )
+
 def gen_struct_decoder_name_from_field(field):
     ftid, _ = gen_field_type_id(field)
     return "_decode_" + ftid
 
 def gen_struct_codec_lib_name_from_field(field):
-    ftid, is_usertype = gen_field_type_id(field)
-    if not is_usertype:
+    ftid, type_category = gen_field_type_id(field)
+    if type_category != INTERNAL_TYPE_CATEGORY_USERTYPE:
         "___{} is not user type ({})___".format(field.name, ftid)
     return prefix_lib(ftid)
 
@@ -294,7 +350,7 @@ def set_library_linking_mode():
     global LIBRARY_LINKING_MODE
     LIBRARY_LINKING_MODE = True
     global SOLIDITY_VERSION
-    SOLIDITY_VERSION = "0.4.23"
+    SOLIDITY_VERSION = "0.4.24"
     global SOLIDITY_PRAGMAS
     SOLIDITY_PRAGMAS = ["pragma experimental ABIEncoderV2"]
 
@@ -305,6 +361,10 @@ def set_internal_linking_mode():
     SOLIDITY_VERSION = "0.4.0"
     global SOLIDITY_PRAGMAS
     SOLIDITY_PRAGMAS = []
+
+def set_enum_as_constant(on):
+    global ENUM_AS_CONSTANT
+    ENUM_AS_CONSTANT = on
 
 def gen_visibility(is_decoder):
     if not LIBRARY_LINKING_MODE:

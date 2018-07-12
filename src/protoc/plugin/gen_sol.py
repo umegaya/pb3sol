@@ -127,6 +127,7 @@ def gen_codec(msg, main_codecs, delegate_codecs, parent_struct_name = None):
 SOLIDITY_NATIVE_TYPEDEFS = "Solidity.proto"
 RUNTIME_FILE_NAME = "runtime.sol"
 GEN_RUNTIME = False
+COMPILE_META_SCHEMA = False
 def apply_options(params_string):
     params = util.parse_urllike_parameter(params_string)
     if "gen_runtime" in params:
@@ -146,6 +147,9 @@ def apply_options(params_string):
     if "use_builtin_enum" in params:
         sys.stderr.write("warning: use_builtin_enum option is still under experiment because we cannot set value to solidity's enum\n")
         util.set_enum_as_constant(True)
+    if "compile_meta_schema" in params:
+        global COMPILE_META_SCHEMA
+        COMPILE_META_SCHEMA = True
 
 def generate_code(request, response):
     generated = 0
@@ -153,6 +157,9 @@ def generate_code(request, response):
     apply_options(request.parameter)
     
     for proto_file in request.proto_file:
+        # skip google.protobuf namespace
+        if proto_file.package == "google.protobuf" and COMPILE_META_SCHEMA:
+            continue
         # skip native solidity type definition
         if SOLIDITY_NATIVE_TYPEDEFS in proto_file.name:
             continue

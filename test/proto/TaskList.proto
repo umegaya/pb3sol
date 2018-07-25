@@ -20,10 +20,12 @@ message TaskList {
     message UrgentTask {
         string explanation = 1;        
         uint32 priority = 2;
+        map<uint32, string> messages = 3;
     }
     .solidity.address id = 1;
     repeated Task tasks = 2;
-    repeated UrgentTask urgents = 3;
+    map<string, UrgentTask> urgents = 3;
+    map<string, UrgentTask> urgents2 = 4;
 }
 
 
@@ -33,4 +35,5 @@ message Rewards {
     repeated TaskList.Task f2 = 3;
     repeated sfixed64 f3 = 4;
     .solidity.int128 f4 = 5;
+    map<string, TaskList.UrgentTask> f5 = 7;
 }

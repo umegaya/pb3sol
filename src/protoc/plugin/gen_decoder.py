@@ -92,7 +92,6 @@ def gen_inner_decoder(msg, parent_struct_name):
         second_pass=gen_inner_fields_decoder(msg, parent_struct_name, False),
     )
 
-
 def gen_field_reader(f, parent_struct_name, msg):
     suffix = ("[ r.{field}.length - counters[{i}] ]").format(field = f.name, i = f.number) if util.field_is_repeated(f) else ""
     return (

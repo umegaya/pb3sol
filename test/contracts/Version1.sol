@@ -6,6 +6,7 @@ import "./libs/pb/TaskList_pb.sol";
 contract Version1 is StorageAccessor {
     //instance method style
     using pb_Rewards for pb_Rewards.Data;
+    using pb_TaskList_UrgentTask for pb_TaskList_UrgentTask.Data;
     pb_Rewards.Data public tmp;
     
 	constructor(address storageAddress) StorageAccessor(storageAddress) public {
@@ -51,10 +52,30 @@ contract Version1 is StorageAccessor {
     function loadReward(string key) public writer {
         bytes memory b = loadBytesByString(key);
         tmp.decode(b);
+
+        pb_TaskList_UrgentTask.Data memory ut; 
+        ut.explanation = "hoge";
+        ut.priority = 1010;
+
+        pb_TaskList_UrgentTask.Data memory ut2;
+        ut2.explanation = "fuga";
+        ut2.priority = 2020;
+
+        tmp.add_f5("foo", ut);
+        tmp.add_f5("bar", ut2);
+
+        tmp.find_f5("foo").add_messages(11, "Foo");
+        tmp.find_f5("bar").add_messages(12, "Bar");
+
+        saveBytesByString(key, tmp.encode());//*/
     }//*/
 
-    function getBytes() public returns (bytes) {
+    function getBytes() public view returns (bytes) {
         return tmp.encode();
+    }
+
+    function Compare(string a, uint len) internal pure returns (bool) {
+        return bytes(a).length == len;
     }
 
     function check() public view reader returns (int) {
@@ -64,11 +85,15 @@ contract Version1 is StorageAccessor {
         if (tmp.f2[0].due_date != 20180303) { return -4; }
         if (tmp.f2[1].due_date != 20180401) { return -5; }
         if (tmp.f2[0].progresses[0].step != 1) { return -6; }
-        if (tmp.f2[0].progresses[0].prog_type != pb_TaskList.ProgressType_Start()) { return -100000 - tmp.f2[0].progresses[0].prog_type; }
+        if (tmp.f2[0].progresses[0].prog_type != pb_TaskList.ProgressType_Start()) { return -9; }
         if (tmp.f2[0].progresses[1].step != -111) { return -7; }
-        if (tmp.f2[0].progresses[1].prog_type != pb_TaskList.ProgressType_Done()) { return -200000 - tmp.f2[0].progresses[1].prog_type; }
+        if (tmp.f2[0].progresses[1].prog_type != pb_TaskList.ProgressType_Done()) { return -10; }
         if (tmp.f2[1].progresses[0].step != 3) { return -8; }
         if (tmp.f4 != -3) { return -9; }    
+        if (bytes(tmp.find_f5("foo").find_messages(11)).length != 3) { return -11; }
+        if (bytes(tmp.find_f5("foo").explanation).length != 4) { return -12; }
+        if (bytes(tmp.find_f5("bar").find_messages(12)).length != 3) { return -13; }
+        /*if (bytes(tmp.find_f5("bar").explanation).length != 4) { return -14; }//*/
         return 0;
     }
 }

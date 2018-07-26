@@ -63,13 +63,13 @@ contract('Versions', function(accounts) {
             proto = ret;
             return sc.getRangeBytesByString.call("reward1", 0);
         }).then(function(ret) {
-            /*console.log('bytes');
+            //console.log('bytes');
             var hex = "0123456789ABCDEF";
             for (var i = 0; i < ret[1]; i++) {
                 var code = ret[0][i];
                 var h = hex[(0xF0 & code) >> 4] + hex[0x0F & code];
                 console.log(h)
-            } */
+            } //*/
             var RewardsProto = proto.lookup("Rewards");
             //this slice will not need after solidity 0.4.21 
             //because dynamic length array can be used for return value of function afterward.
@@ -87,6 +87,11 @@ contract('Versions', function(accounts) {
             assert.equal(rewards.f2[0].progresses[1].step.toNumber(), -111, "f2[0].progresses[1].step should correct");
             assert.equal(rewards.f2[0].progresses[1].progType, 34, "f2[0].progresses[1].prog_type should correct");
             assert.equal(rewards.f4.toBigint().toString(), "-3", "f4 should correct");
+            //console.log('f5', rewards.f5);
+            assert.equal(rewards.f5["foo"].explanation, "hoge", "f5[foo] wrong");
+            assert.equal(rewards.f5["foo"].messages[11], "Foo", "f5[foo][11] wrong");
+            assert.equal(rewards.f5["bar"].explanation, "fuga", "f5[bar] wrong");
+            assert.equal(rewards.f5["bar"].messages[12], "Bar", "f5[bar][12] wrong");
 
         //then, load it with version2 schema (with convert)
             var c2;

@@ -5,6 +5,7 @@ var server = ganache.server({
     mnemonic: "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
     gasLimit: 672197500,
     logger: console,
+    verbose: false,
 });
 server.listen(9545, function(err, blockchain) {
 });

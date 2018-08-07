@@ -1,6 +1,7 @@
 pragma solidity ^0.4.17;
 
 import "./libs/StorageAccessor.sol";
+import "./libs/StrUtil.sol";
 import "./libs/pb/TaskList_pb.sol";
 
 contract Version1 is StorageAccessor {
@@ -64,18 +65,14 @@ contract Version1 is StorageAccessor {
         tmp.add_f5("foo", ut);
         tmp.add_f5("bar", ut2);
 
-        tmp.find_f5("foo").add_messages(11, "Foo");
-        tmp.find_f5("bar").add_messages(12, "Bar");
+        tmp.get_f5("foo").add_messages(11, "Foo");
+        tmp.get_f5("bar").add_messages(12, "Bar");
 
         saveBytesByString(key, tmp.encode());//*/
     }//*/
 
     function getBytes() public view returns (bytes) {
         return tmp.encode();
-    }
-
-    function Compare(string a, uint len) internal pure returns (bool) {
-        return bytes(a).length == len;
     }
 
     function check() public view reader returns (int) {
@@ -90,10 +87,22 @@ contract Version1 is StorageAccessor {
         if (tmp.f2[0].progresses[1].prog_type != pb_TaskList.ProgressType_Done()) { return -10; }
         if (tmp.f2[1].progresses[0].step != 3) { return -8; }
         if (tmp.f4 != -3) { return -9; }    
-        if (bytes(tmp.find_f5("foo").find_messages(11)).length != 3) { return -11; }
-        if (bytes(tmp.find_f5("foo").explanation).length != 4) { return -12; }
-        if (bytes(tmp.find_f5("bar").find_messages(12)).length != 3) { return -13; }
-        /*if (bytes(tmp.find_f5("bar").explanation).length != 4) { return -14; }//*/
+
+        bool found; 
+        pb_TaskList_UrgentTask.Data storage f5;
+        string storage m;
+
+        (found, f5) = tmp.search_f5("baz");
+        if (found) { return -16; }
+        (found, f5) = tmp.search_f5("foo");
+        if (!found) { return -15; }
+        (found, m) = f5.search_messages(11);
+        if (!found || !StrUtil.Compare(m, "Foo")) { return -11; }
+        if (!found || !StrUtil.Compare(f5.explanation, "hoge")) { return -12; }
+        (found, f5) = tmp.search_f5("bar");
+        if (!found) { return -13; }
+        (found, m) = f5.search_messages(12);
+        if (!found || !StrUtil.Compare(m, "Bar")) { return -14; }
         return 0;
     }
 }

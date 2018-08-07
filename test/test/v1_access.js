@@ -64,7 +64,7 @@ contract('Versions', function(accounts) {
             return sc.getRangeBytesByString.call("reward1", 0);
         }).then(function(ret) {
             //console.log('bytes');
-            var hex = "0123456789ABCDEF";
+            /*var hex = "0123456789ABCDEF";
             for (var i = 0; i < ret[1]; i++) {
                 var code = ret[0][i];
                 var h = hex[(0xF0 & code) >> 4] + hex[0x0F & code];

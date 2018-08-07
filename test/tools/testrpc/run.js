@@ -5,7 +5,7 @@ var server = ganache.server({
     mnemonic: "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
     gasLimit: 672197500,
     logger: console,
-    verbose: false,
+    allowUnlimitedContractSize: true, //bypass contract size limit 2kb (EIP-170)
 });
 server.listen(9545, function(err, blockchain) {
 });

@@ -144,8 +144,12 @@ def gen_value_copy_code(value_field, dst_flagment):
 
 def gen_map_helper_codes_for_field(f, nested_type):
     return ("""  //map helpers for {name}
-  function find_{name}(Data storage self, {key_type} key) internal view returns ({value_type} storage) {{
+  function get_{name}(Data storage self, {key_type} key) internal view returns ({value_type} storage) {{
     return {val_name}[{map_name}[key] - 1].value;
+  }}
+  function search_{name}(Data storage self, {key_type} key) internal view returns (bool, {value_type} storage) {{
+    if ({map_name}[key] <= 0) {{ return (false, {val_name}[0].value); }}
+    return (true, {val_name}[{map_name}[key] - 1].value);
   }}                                                                  
   function add_{name}(Data storage self, {key_type} key, {value_type} value) internal {{
     if ({map_name}[key] != 0) {{

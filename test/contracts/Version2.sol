@@ -48,15 +48,15 @@ contract Version2 is StorageAccessor {
         if (tmp.f2[1].progresses[0].step != 3) { return -8; }
         if (tmp.f4 != -3) { return -9; }    
         if (tmp.new_id != 123) { return -10; }
-        if (!StrUtil.Compare(pb2_TaskList_UrgentTask.find_messages(pb2_Rewards.find_f5(tmp, "foo"), 11), "Foo")) { 
+        if (!StrUtil.Compare(pb2_TaskList_UrgentTask.get_messages(pb2_Rewards.get_f5(tmp, "foo"), 11), "Foo")) { 
             return -13; 
         }
-        if (!StrUtil.Compare(pb2_TaskList_UrgentTask.find_messages(pb2_Rewards.find_f5(tmp, "bar"), 12), "Bar")) { 
+        if (!StrUtil.Compare(pb2_TaskList_UrgentTask.get_messages(pb2_Rewards.get_f5(tmp, "bar"), 12), "Bar")) { 
             return -15; 
         }
-        string memory e1 = pb2_Rewards.find_f5(tmp, "bar").explanation;
-        if (!StrUtil.Compare(e1, "fuga")) { return -int(bytes(e1).length); }//*/
-        if (!StrUtil.Compare(pb2_Rewards.find_f5(tmp, "foo").explanation, "hoge")) { return -14; }
+        string memory e1 = pb2_Rewards.get_f5(tmp, "bar").explanation;
+        if (!StrUtil.Compare(e1, "fuga")) { return -16; }//*/
+        if (!StrUtil.Compare(pb2_Rewards.get_f5(tmp, "foo").explanation, "hoge")) { return -14; }
         return 0;
     }
 

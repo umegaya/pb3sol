@@ -23,10 +23,16 @@ def gen_map_fields_decl_for_field(f, nested_type):
         container_type=util.gen_global_type_name_from_field(f)
     );
 
+def gen_nested_struct_name(nested_type, parent_msg, parent_struct_name):
+    flagments = [parent_struct_name, parent_msg.name, nested_type.name] if parent_struct_name else [util.current_package_name(), parent_msg.name, nested_type.name]
+    pb_nested_struct_name = "_".join(flagments)
+    if pb_nested_struct_name[0] == '_':
+        pb_nested_struct_name = pb_nested_struct_name[1:]
+    return pb_nested_struct_name    
+
 def gen_map_fields_helper(nested_type, parent_msg, parent_struct_name):
     if nested_type.options and nested_type.options.map_entry:
-        flagments = [parent_struct_name, parent_msg.name, nested_type.name] if parent_struct_name else [parent_msg.name, nested_type.name]
-        pb_nested_struct_name = "_".join(flagments)
+        pb_nested_struct_name = gen_nested_struct_name(nested_type, parent_msg, parent_struct_name)
         map_fields = list(filter(
             lambda f: util.gen_struct_name_from_field(f) == pb_nested_struct_name, 
             parent_msg.field))
@@ -80,8 +86,7 @@ def gen_utility_functions(msg, parent_struct_name):
 def gen_map_insert_on_store(f, parent_msg, parent_struct_name):
     for nt in parent_msg.nested_type:
         if nt.options and nt.options.map_entry:
-            flagments = [parent_struct_name, parent_msg.name, nt.name] if parent_struct_name else [parent_msg.name, nt.name]
-            pb_nested_struct_name = "_".join(flagments)            
+            pb_nested_struct_name = gen_nested_struct_name(nt, parent_msg, parent_struct_name)
             if util.gen_struct_name_from_field(f) == pb_nested_struct_name:
                 return ('output._{name}_map[input.{name}[i{i}].key] = uint32(i{i}+1);\n').format(
                     name = f.name,
@@ -184,8 +189,7 @@ def gen_map_helper_codes_for_field(f, nested_type):
 
 def gen_map_helper(nested_type, parent_msg, parent_struct_name):
     if nested_type.options and nested_type.options.map_entry:
-        flagments = [parent_struct_name, parent_msg.name, nested_type.name] if parent_struct_name else [parent_msg.name, nested_type.name]
-        pb_nested_struct_name = "_".join(flagments)
+        pb_nested_struct_name = gen_nested_struct_name(nested_type, parent_msg, parent_struct_name)
         map_fields = list(filter(
             lambda f: util.gen_struct_name_from_field(f) == pb_nested_struct_name, 
             parent_msg.field))

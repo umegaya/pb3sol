@@ -336,11 +336,15 @@ def change_pb_libname_prefix(new_name):
     PB_LIB_NAME_PREFIX = new_name
 
 def change_package_name(new_name):
+    global PB_CURRENT_PACKAGE
     if new_name:
-        global PB_CURRENT_PACKAGE
         PB_CURRENT_PACKAGE = "_" + new_name.replace(".", "_")
     else:
         PB_CURRENT_PACKAGE = ""
+
+def current_package_name():
+    global PB_CURRENT_PACKAGE
+    return PB_CURRENT_PACKAGE
 
 def is_lib_linking_mode():
     global LIBRARY_LINKING_MODE

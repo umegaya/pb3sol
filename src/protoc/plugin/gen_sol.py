@@ -24,7 +24,7 @@ def gen_map_fields_decl_for_field(f, nested_type):
     );
 
 def gen_nested_struct_name(nested_type, parent_msg, parent_struct_name):
-    flagments = [parent_struct_name, parent_msg.name, nested_type.name] if parent_struct_name else [util.current_package_name(), parent_msg.name, nested_type.name]
+    flagments = [util.current_package_name(), parent_struct_name, parent_msg.name, nested_type.name] if parent_struct_name else [util.current_package_name(), parent_msg.name, nested_type.name]
     pb_nested_struct_name = "_".join(flagments)
     if pb_nested_struct_name[0] == '_':
         pb_nested_struct_name = pb_nested_struct_name[1:]

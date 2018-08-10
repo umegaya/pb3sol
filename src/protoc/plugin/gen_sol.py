@@ -148,11 +148,13 @@ def gen_value_copy_code(value_field, dst_flagment):
         return ("{dst}.value = value;").format(dst = dst_flagment)
 
 def gen_map_helper_codes_for_field(f, nested_type):
+    kf = nested_type.field[0]
+    vf = nested_type.field[1]
     return ("""  //map helpers for {name}
-  function get_{name}(Data storage self, {key_type} key) internal view returns ({value_type} storage) {{
+  function get_{name}(Data storage self, {key_type} key) internal view returns ({value_type} {storage_type}) {{
     return {val_name}[{map_name}[key] - 1].value;
   }}
-  function search_{name}(Data storage self, {key_type} key) internal view returns (bool, {value_type} storage) {{
+  function search_{name}(Data storage self, {key_type} key) internal view returns (bool, {value_type} {storage_type}) {{
     if ({map_name}[key] <= 0) {{ return (false, {val_name}[0].value); }}
     return (true, {val_name}[{map_name}[key] - 1].value);
   }}                                                                  
@@ -180,11 +182,12 @@ def gen_map_helper_codes_for_field(f, nested_type):
         name = f.name,
         val_name="self.{0}".format(f.name),
         map_name = "self._{0}_map".format(f.name),
-        key_type=util.gen_global_type_name_from_field(nested_type.field[0]),
-        value_type=util.gen_global_type_name_from_field(nested_type.field[1]),
+        key_type=util.gen_global_type_name_from_field(kf),
+        value_type=util.gen_global_type_name_from_field(vf),
+        storage_type="storage" if (util.field_is_repeated(vf) or util.field_is_message(vf)) else "",
         container_type=util.gen_global_type_name_from_field(f),
-        copy_value_exists=gen_value_copy_code(nested_type.field[1], ("self.{0}[self._{0}_map[key] - 1]").format(f.name)),
-        copy_value_new=gen_value_copy_code(nested_type.field[1], ("self.{0}[self.{0}.length - 1]").format(f.name)),
+        copy_value_exists=gen_value_copy_code(vf, ("self.{0}[self._{0}_map[key] - 1]").format(f.name)),
+        copy_value_new=gen_value_copy_code(vf, ("self.{0}[self.{0}.length - 1]").format(f.name)),
     );
 
 def gen_map_helper(nested_type, parent_msg, parent_struct_name):

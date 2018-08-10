@@ -90,7 +90,7 @@ contract Version1 is StorageAccessor {
 
         bool found; 
         pb_TaskList_UrgentTask.Data storage f5;
-        string storage m;
+        string memory m;
 
         (found, f5) = tmp.search_f5("baz");
         if (found) { return -16; }
